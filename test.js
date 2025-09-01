@@ -1,0 +1,141 @@
+import { green, getMaxPorts, numberConvert, scanNetworks } from "helpers/Functions";
+
+/** @param {NS} ns **/
+function deploy(ns){
+	const hackScript = `/scripts/single/hack.js`;
+	const weakenScript = `/scripts/single/weaken.js`;
+	const weakenScriptRepeat = `/scripts/repeat/weaken.js`;
+	const growScript = `/scripts/single/grow.js`;
+	const functionScript = `/helpers/Functions.js`;
+	const shareRAM = `/scripts/repeat/share.js`;
+	const shareManager = "/managers/shareManager.js";
+
+	const servers = ns.getPurchasedServers();
+	const serverJSON = JSON.parse(ns.read("/helpers/servers.txt"));
+
+	for(const server in serverJSON){
+		servers.push(server);
+	}
+
+	// ns.print(servers);
+
+	for(const server of servers){
+		if(server === "home") continue;
+		ns.killall(server);
+
+		ns.scp([hackScript, weakenScript, weakenScriptRepeat, growScript, functionScript, shareRAM, shareManager], server);
+		ns.print(`Copied the files to ${server}!`);
+	}
+}
+
+
+/** @param {NS} ns **/
+function share(ns){
+	ns.ui.closeTail();
+
+	deploy(ns);
+	const servers = ns.getPurchasedServers();
+	const serverJSON = JSON.parse(ns.read("/helpers/servers.txt"));
+
+	for(const server in serverJSON){
+		servers.push(server);
+	}
+
+	for(const server of servers){
+		ns.killall(server);
+		ns.exec("/managers/shareManager.js", server);
+	}
+
+}
+
+
+/** @param {NS} ns **/
+function xp(ns){
+	ns.ui.closeTail();
+
+	deploy(ns);
+	const servers = ns.getPurchasedServers();
+	const serverJSON = JSON.parse(ns.read("/helpers/servers.txt"));
+
+	for(const server in serverJSON){
+		servers.push(server);
+	}
+
+	for(const server of servers){
+		const ram = ns.getServerMaxRam(server);
+		const maxThreads = (ram - 0.1) / ns.getScriptRam("/scripts/repeat/weaken.js", server);
+
+		ns.killall(server);
+		ns.print(`Setting ${server} to gain xp!`);
+		ns.exec("/scripts/repeat/weaken.js", server, Math.max(Math.floor(maxThreads), 1), "foodnstuff");
+	}
+
+}
+
+
+/** @param {NS} ns **/
+function batch(ns, minMoney){
+	if(!minMoney) return ns.print("Arg2 was not specified!");
+	const money = parseInt(minMoney);
+	if(isNaN(money)) return ns.print("Arg2 was not a number!");
+	const portsAvailable = getMaxPorts(ns);
+
+	const servers = JSON.parse(ns.read("/helpers/servers.txt"));
+
+	// ns.print(`Hackable servers with more than $${green(numberConvert(money))}:`);
+	const goodServers = [];
+	ns.ui.setTailTitle(`Servers with more than $${numberConvert(money)}`);
+	for(const serverName in servers){
+		const server = servers[serverName];
+		const skilledEnough = server.hackLevel <= ns.getHackingLevel();
+
+		if(server.maxMoney > money){
+			if(skilledEnough && server.ports <= portsAvailable){
+				goodServers.push(server);
+			}
+		}
+	}
+
+	goodServers.sort((a, b) => a.maxMoney - b.maxMoney);
+	for(const server of goodServers){
+		ns.print(`REQ LVL: ${green(server.hackLevel)} | $${green(numberConvert(server.maxMoney))} | MIN SEC: ${green(ns.getServerMinSecurityLevel(server.name))} - ${server.name}`);
+	}
+}
+
+
+/** @param {NS} ns **/
+function pos(ns){
+	ns.ui.resizeTail(800, 82);
+	const [winX, winY] = ns.ui.windowSize();
+	const pos = ns.args[1] || 0;
+	ns.ui.moveTail(250, (winY - 100) - (82 * (pos + 1))); // Bottom Left Corner
+	ns.print("One");
+	ns.print("Two");
+	ns.print("Three");
+}
+
+
+/** @param {NS} ns **/
+export async function main(ns){
+	ns.disableLog("ALL");
+	ns.ui.openTail();
+
+	const argument = ns.args[0];
+	if(argument === "deploy") deploy(ns);
+	if(argument === "share") share(ns);
+	if(argument === "batch" || argument === "money") batch(ns, ns.args[1]);
+	if(argument === "pos") pos(ns);
+	if(argument === "xp") xp(ns);
+	if(argument === "scan") ns.print(scanNetworks(ns, "home", true));
+	if(argument === "player"){
+		const player = ns.getPlayer();
+		const killed = player.numPeopleKilled;
+		const karma = player.karma;
+		const entropy = player.entropy;
+
+		ns.tprint(`Killed: ${killed} | Karma: ${karma} | Entropy: ${entropy}`);
+		ns.ui.closeTail();
+	}
+	// ns.alert("Recommended Actions:\n- Purchase TOR Router\n- Set to 'Rob Store'");
+	// ns.print(ns.peek(20));
+}

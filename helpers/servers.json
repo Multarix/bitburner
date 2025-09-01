@@ -1,0 +1,572 @@
+{
+	".": {
+		"hackLevel": 522,
+		"maxMoney": 0,
+		"name": ".",
+		"ports": 4
+	},
+	"4sigma": {
+		"hackLevel": 1087,
+		"maxMoney": 530108109825,
+		"name": "4sigma",
+		"ports": 5
+	},
+	"aerocorp": {
+		"hackLevel": 907,
+		"maxMoney": 25003473850,
+		"name": "aerocorp",
+		"ports": 5
+	},
+	"aevum-police": {
+		"hackLevel": 441,
+		"maxMoney": 6423034450,
+		"name": "aevum-police",
+		"ports": 4
+	},
+	"alpha-ent": {
+		"hackLevel": 558,
+		"maxMoney": 16824180950,
+		"name": "alpha-ent",
+		"ports": 4
+	},
+	"applied-energetics": {
+		"hackLevel": 780,
+		"maxMoney": 20297976225,
+		"name": "applied-energetics",
+		"ports": 4
+	},
+	"avmnite-02h": {
+		"hackLevel": 208,
+		"maxMoney": 0,
+		"name": "avmnite-02h",
+		"ports": 2
+	},
+	"b-and-a": {
+		"hackLevel": 1121,
+		"maxMoney": 637648334775,
+		"name": "b-and-a",
+		"ports": 5
+	},
+	"blade": {
+		"hackLevel": 1162,
+		"maxMoney": 977027139000,
+		"name": "blade",
+		"ports": 5
+	},
+	"catalyst": {
+		"hackLevel": 418,
+		"maxMoney": 10908243875,
+		"name": "catalyst",
+		"ports": 3
+	},
+	"clarkinc": {
+		"hackLevel": 1126,
+		"maxMoney": 484458101825,
+		"name": "clarkinc",
+		"ports": 5
+	},
+	"computek": {
+		"hackLevel": 329,
+		"maxMoney": 5507204625,
+		"name": "computek",
+		"ports": 3
+	},
+	"crush-fitness": {
+		"hackLevel": 268,
+		"maxMoney": 1117577225,
+		"name": "crush-fitness",
+		"ports": 2
+	},
+	"CSEC": {
+		"hackLevel": 55,
+		"maxMoney": 0,
+		"name": "CSEC",
+		"ports": 1
+	},
+	"darkweb": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "darkweb",
+		"ports": 5
+	},
+	"defcomm": {
+		"hackLevel": 926,
+		"maxMoney": 22920669575,
+		"name": "defcomm",
+		"ports": 5
+	},
+	"deltaone": {
+		"hackLevel": 800,
+		"maxMoney": 34699515925,
+		"name": "deltaone",
+		"ports": 5
+	},
+	"ecorp": {
+		"hackLevel": 1092,
+		"maxMoney": 1459085920250,
+		"name": "ecorp",
+		"ports": 5
+	},
+	"foodnstuff": {
+		"hackLevel": 1,
+		"maxMoney": 50000000,
+		"name": "foodnstuff",
+		"ports": 0
+	},
+	"fulcrumassets": {
+		"hackLevel": 1495,
+		"maxMoney": 25000000,
+		"name": "fulcrumassets",
+		"ports": 5
+	},
+	"fulcrumtech": {
+		"hackLevel": 966,
+		"maxMoney": 40381703600,
+		"name": "fulcrumtech",
+		"ports": 5
+	},
+	"galactic-cyber": {
+		"hackLevel": 835,
+		"maxMoney": 18760170300,
+		"name": "galactic-cyber",
+		"ports": 5
+	},
+	"global-pharm": {
+		"hackLevel": 767,
+		"maxMoney": 39890874475,
+		"name": "global-pharm",
+		"ports": 4
+	},
+	"hack-0": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-0",
+		"ports": 5
+	},
+	"hack-1": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-1",
+		"ports": 5
+	},
+	"hack-10": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-10",
+		"ports": 5
+	},
+	"hack-11": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-11",
+		"ports": 5
+	},
+	"hack-12": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-12",
+		"ports": 5
+	},
+	"hack-13": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-13",
+		"ports": 5
+	},
+	"hack-14": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-14",
+		"ports": 5
+	},
+	"hack-15": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-15",
+		"ports": 5
+	},
+	"hack-16": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-16",
+		"ports": 5
+	},
+	"hack-17": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-17",
+		"ports": 5
+	},
+	"hack-18": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-18",
+		"ports": 5
+	},
+	"hack-19": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-19",
+		"ports": 5
+	},
+	"hack-2": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-2",
+		"ports": 5
+	},
+	"hack-20": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-20",
+		"ports": 5
+	},
+	"hack-21": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-21",
+		"ports": 5
+	},
+	"hack-22": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-22",
+		"ports": 5
+	},
+	"hack-23": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-23",
+		"ports": 5
+	},
+	"hack-24": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-24",
+		"ports": 5
+	},
+	"hack-3": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-3",
+		"ports": 5
+	},
+	"hack-4": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-4",
+		"ports": 5
+	},
+	"hack-5": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-5",
+		"ports": 5
+	},
+	"hack-6": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-6",
+		"ports": 5
+	},
+	"hack-7": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-7",
+		"ports": 5
+	},
+	"hack-8": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-8",
+		"ports": 5
+	},
+	"hack-9": {
+		"hackLevel": 1,
+		"maxMoney": 0,
+		"name": "hack-9",
+		"ports": 5
+	},
+	"harakiri-sushi": {
+		"hackLevel": 40,
+		"maxMoney": 100000000,
+		"name": "harakiri-sushi",
+		"ports": 0
+	},
+	"helios": {
+		"hackLevel": 875,
+		"maxMoney": 14695814850,
+		"name": "helios",
+		"ports": 5
+	},
+	"hong-fang-tea": {
+		"hackLevel": 30,
+		"maxMoney": 75000000,
+		"name": "hong-fang-tea",
+		"ports": 0
+	},
+	"I.I.I.I": {
+		"hackLevel": 348,
+		"maxMoney": 0,
+		"name": "I.I.I.I",
+		"ports": 3
+	},
+	"icarus": {
+		"hackLevel": 867,
+		"maxMoney": 24799898875,
+		"name": "icarus",
+		"ports": 5
+	},
+	"infocomm": {
+		"hackLevel": 879,
+		"maxMoney": 18465446425,
+		"name": "infocomm",
+		"ports": 5
+	},
+	"iron-gym": {
+		"hackLevel": 100,
+		"maxMoney": 500000000,
+		"name": "iron-gym",
+		"ports": 1
+	},
+	"joesguns": {
+		"hackLevel": 10,
+		"maxMoney": 62500000,
+		"name": "joesguns",
+		"ports": 0
+	},
+	"johnson-ortho": {
+		"hackLevel": 294,
+		"maxMoney": 2012227350,
+		"name": "johnson-ortho",
+		"ports": 2
+	},
+	"kuai-gong": {
+		"hackLevel": 1060,
+		"maxMoney": 690099681975,
+		"name": "kuai-gong",
+		"ports": 5
+	},
+	"lexo-corp": {
+		"hackLevel": 701,
+		"maxMoney": 19831898775,
+		"name": "lexo-corp",
+		"ports": 4
+	},
+	"max-hardware": {
+		"hackLevel": 80,
+		"maxMoney": 250000000,
+		"name": "max-hardware",
+		"ports": 1
+	},
+	"megacorp": {
+		"hackLevel": 1116,
+		"maxMoney": 1486946243000,
+		"name": "megacorp",
+		"ports": 5
+	},
+	"microdyne": {
+		"hackLevel": 835,
+		"maxMoney": 15096310200,
+		"name": "microdyne",
+		"ports": 5
+	},
+	"millenium-fitness": {
+		"hackLevel": 513,
+		"maxMoney": 6250000000,
+		"name": "millenium-fitness",
+		"ports": 3
+	},
+	"n00dles": {
+		"hackLevel": 1,
+		"maxMoney": 1750000,
+		"name": "n00dles",
+		"ports": 0
+	},
+	"nectar-net": {
+		"hackLevel": 20,
+		"maxMoney": 68750000,
+		"name": "nectar-net",
+		"ports": 0
+	},
+	"neo-net": {
+		"hackLevel": 50,
+		"maxMoney": 125000000,
+		"name": "neo-net",
+		"ports": 1
+	},
+	"netlink": {
+		"hackLevel": 422,
+		"maxMoney": 6875000000,
+		"name": "netlink",
+		"ports": 3
+	},
+	"nova-med": {
+		"hackLevel": 806,
+		"maxMoney": 28020601800,
+		"name": "nova-med",
+		"ports": 4
+	},
+	"nwo": {
+		"hackLevel": 1147,
+		"maxMoney": 948450195400,
+		"name": "nwo",
+		"ports": 5
+	},
+	"omega-net": {
+		"hackLevel": 220,
+		"maxMoney": 1660016975,
+		"name": "omega-net",
+		"ports": 2
+	},
+	"omnia": {
+		"hackLevel": 924,
+		"maxMoney": 23657043750,
+		"name": "omnia",
+		"ports": 5
+	},
+	"omnitek": {
+		"hackLevel": 1081,
+		"maxMoney": 521007962825,
+		"name": "omnitek",
+		"ports": 5
+	},
+	"phantasy": {
+		"hackLevel": 100,
+		"maxMoney": 600000000,
+		"name": "phantasy",
+		"ports": 2
+	},
+	"powerhouse-fitness": {
+		"hackLevel": 1094,
+		"maxMoney": 22500000000,
+		"name": "powerhouse-fitness",
+		"ports": 5
+	},
+	"rho-construction": {
+		"hackLevel": 517,
+		"maxMoney": 12534763875,
+		"name": "rho-construction",
+		"ports": 3
+	},
+	"rothman-uni": {
+		"hackLevel": 377,
+		"maxMoney": 4873262975,
+		"name": "rothman-uni",
+		"ports": 3
+	},
+	"run4theh111z": {
+		"hackLevel": 533,
+		"maxMoney": 0,
+		"name": "run4theh111z",
+		"ports": 4
+	},
+	"sigma-cosmetics": {
+		"hackLevel": 5,
+		"maxMoney": 57500000,
+		"name": "sigma-cosmetics",
+		"ports": 0
+	},
+	"silver-helix": {
+		"hackLevel": 150,
+		"maxMoney": 1125000000,
+		"name": "silver-helix",
+		"ports": 2
+	},
+	"snap-fitness": {
+		"hackLevel": 742,
+		"maxMoney": 11250000000,
+		"name": "snap-fitness",
+		"ports": 4
+	},
+	"solaris": {
+		"hackLevel": 841,
+		"maxMoney": 20337109550,
+		"name": "solaris",
+		"ports": 5
+	},
+	"stormtech": {
+		"hackLevel": 1062,
+		"maxMoney": 25934345475,
+		"name": "stormtech",
+		"ports": 5
+	},
+	"summit-uni": {
+		"hackLevel": 473,
+		"maxMoney": 5916910300,
+		"name": "summit-uni",
+		"ports": 3
+	},
+	"syscore": {
+		"hackLevel": 586,
+		"maxMoney": 11231203950,
+		"name": "syscore",
+		"ports": 4
+	},
+	"taiyang-digital": {
+		"hackLevel": 878,
+		"maxMoney": 22336302425,
+		"name": "taiyang-digital",
+		"ports": 5
+	},
+	"The-Cave": {
+		"hackLevel": 925,
+		"maxMoney": 0,
+		"name": "The-Cave",
+		"ports": 5
+	},
+	"the-hub": {
+		"hackLevel": 310,
+		"maxMoney": 4576808075,
+		"name": "the-hub",
+		"ports": 2
+	},
+	"titan-labs": {
+		"hackLevel": 827,
+		"maxMoney": 21247464925,
+		"name": "titan-labs",
+		"ports": 5
+	},
+	"unitalife": {
+		"hackLevel": 819,
+		"maxMoney": 26964666850,
+		"name": "unitalife",
+		"ports": 4
+	},
+	"univ-energy": {
+		"hackLevel": 844,
+		"maxMoney": 28363769925,
+		"name": "univ-energy",
+		"ports": 4
+	},
+	"vitalife": {
+		"hackLevel": 785,
+		"maxMoney": 19498623725,
+		"name": "vitalife",
+		"ports": 5
+	},
+	"zb-def": {
+		"hackLevel": 777,
+		"maxMoney": 24480189800,
+		"name": "zb-def",
+		"ports": 4
+	},
+	"zb-institute": {
+		"hackLevel": 734,
+		"maxMoney": 26531461325,
+		"name": "zb-institute",
+		"ports": 5
+	},
+	"zer0": {
+		"hackLevel": 75,
+		"maxMoney": 187500000,
+		"name": "zer0",
+		"ports": 1
+	},
+	"zeus-med": {
+		"hackLevel": 805,
+		"maxMoney": 37149913375,
+		"name": "zeus-med",
+		"ports": 5
+	}
+}

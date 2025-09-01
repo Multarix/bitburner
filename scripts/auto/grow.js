@@ -1,5 +1,5 @@
 /** @param {NS} ns **/
-export async function main(ns) {
+export async function main(ns){
 	const growThreads = ns.args[0];
 	const weakenThreads = ns.args[1];
 	const hackThreads = ns.args[2];

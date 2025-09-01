@@ -1,164 +1,129 @@
-import { timeConvert } from "/adv/extra/timeConvert.js";
-import { numberConvert } from "/adv/extra/numberConvert.js";
+import { timeConvert, gainRoot, white, scanNetworks } from "/helpers/Functions.js";
+
+const theme = {
+	"primarylight": "#FFFFFF",
+	"primary": "#FFFFFF",
+	"primarydark": "#BBBBBB",
+	"successlight": "#0f0",
+	"success": "#0c0",
+	"successdark": "#090",
+	"errorlight": "#f00",
+	"error": "#c00",
+	"errordark": "#900",
+	"secondarylight": "#AAA",
+	"secondary": "#AAFFAE",
+	"secondarydark": "#666",
+	"warninglight": "#ff0",
+	"warning": "#cc0",
+	"warningdark": "#990",
+	"infolight": "#69f",
+	"info": "#36c",
+	"infodark": "#039",
+	"welllight": "#444",
+	"well": "#222222",
+	"white": "#fff",
+	"black": "#000000",
+	"hp": "#dd3434",
+	"money": "#ffd700",
+	"hack": "#adff2f",
+	"combat": "#faffdf",
+	"cha": "#a671d1",
+	"int": "#6495ed",
+	"rep": "#faffdf",
+	"disabled": "#CF6565",
+	"backgroundprimary": "#000000",
+	"backgroundsecondary": "#181818",
+	"button": "#333333",
+	"maplocation": "#ffffff",
+	"bnlvl0": "#ffff00",
+	"bnlvl1": "#ff0000",
+	"bnlvl2": "#48d1cc",
+	"bnlvl3": "#0000ff"
+};
+
 /** @param {NS} ns **/
-export async function main(ns) {
+export async function main(ns){
 	ns.disableLog("ALL");
-	ns.print("Starting Script");
+	ns.clearLog();
+	ns.ui.setTheme(theme);
 
-	const allNetworks = new Object();
-	function scanNetworks(hostName) {
-		const scanResults = ns.scan(hostName); // Scan the server;
+	const allNetworks = scanNetworks(ns, "home", true);
 
-		for (const host of scanResults) {
-			if (allNetworks[host]) continue;
-			if (host === "home") continue
-			allNetworks[host] = new Object();
-			allNetworks[host].name = host;
-			allNetworks[host].hackLevel = ns.getServerRequiredHackingLevel(host);
-			allNetworks[host].ports = ns.getServerNumPortsRequired(host);
-			allNetworks[host].maxMoney = ns.getServerMaxMoney(host);
-
-			scanNetworks(host);
-		}
-	}
-	scanNetworks("home");
-
-	const serverList = "/adv/servers.txt";
-	await ns.write(serverList, JSON.stringify(allNetworks, null, "\t"), "w");
+	const serverList = "/helpers/servers.txt";
+	ns.clear(serverList);
+	ns.write(serverList, JSON.stringify(allNetworks, null, "\t"), "w");
 
 	const homeRAM = ns.getServerMaxRam('home');
 
-	const bigHack = (ns.getHackingLevel() <= 10) ? true : false;
-	if (bigHack && 20 > ns.getHackingLevel()) {
-		ns.run("/adv/extra/rootAccess.js", 1, "foodnstuff");
+	// Initial Run, hacks foodnstuff with the maximum possible threads to get xp.
+	const bigHack = (ns.getHackingLevel() <= 20);
+	if(bigHack){
+		const money = ns.getPlayer().money;
+		if(money > 210000 && !ns.hasTorRouter()){
+			ns.run("/helpers/startHelper.js");
+			await ns.sleep(1000);
+		}
+
+		gainRoot(ns, "foodnstuff");
 		await ns.sleep(500);
+
 		const waitTime = ns.getWeakenTime("foodnstuff");
-		const maxThreads = (homeRAM - 8) / ns.getScriptRam("/scripts/optimal/weaken.js");
-		ns.run("/scripts/optimal/weaken.js", maxThreads, "foodnstuff");
-		ns.print(`Doing mass weaken for exp | ETA: ${timeConvert(waitTime + 2000)}`);
+		const maxThreads = Math.floor((homeRAM - 8) / ns.getScriptRam("/scripts/single/weaken.js"));
+		ns.run("/scripts/single/weaken.js", maxThreads, "foodnstuff");
+		ns.print(`Doing mass weaken for exp | ETA: ${white(timeConvert(waitTime + 2000))}`);
+
 		await ns.sleep(waitTime + 2000);
 	}
 
-	const newGame = (homeRAM <= 16384) ? true : false;
 
-	ns.scriptKill("hacknet.js", "home");
-	ns.scriptKill("stockmarket.js", "home");
-	ns.scriptKill("/adv/newGame.js", "home");
-	ns.scriptKill("/adv/autoNuke.js", "home");
-	ns.scriptKill("/adv/buyServer.js", "home");
+	ns.scriptKill("/managers/goManager.js", "home");
+	ns.scriptKill("/managers/hacknetManager.js", "home");
+	ns.scriptKill("/managers/stockManager.js", "home");
+	ns.scriptKill("/managers/selfhackManager.js", "home");
+	ns.scriptKill("managers/gangManager.js", "home");
+	ns.scriptKill("/managers/manageServers.jsx", "home");
+	ns.scriptKill("/managers/buyServer.js", "home");
+	ns.scriptKill("/managers/targetManager.jsx", "home");
+	ns.scriptKill("/managers/autoBuyer.js", "home");
+
 
 	ns.toast("Starting scripts!", "info", 10000);
-	if (newGame) {
-		ns.run("/adv/newGame.js");
-		ns.print("- New game script was started");
-	} else {
-		ns.run("/adv/autoNuke.js")
-		ns.print("- AutoNuke script was started");
+	ns.run("/managers/selfhackManager.js");
+	ns.print(`Selfhack Manager Started`, "info");
 
-		ns.run("/adv/buyServer.js", 1, false, "exp");
-		ns.print("- Buyserver script was started for EXP");
+
+	// Even without formulas.exe, we can start the hacknet manager... but only if we pass an arg to the script
+	const runHacknetManager = await ns.prompt("Start the Hacknet Manager?", { type: "boolean" });
+	if(runHacknetManager){
+		ns.exec("/managers/hacknetManager.js", "home", { threads: 1, preventDuplicates: true });
+		ns.toast("Hacknet manager was started", "info");
 	}
 
-	// ns.print(`Home server has ${homeRAM}GB of RAM`);
-	if (homeRAM <= 2048) {
-		ns.run("hacknet.js", 1, newGame); // Startup hacknet script
-		ns.print("- Hacknet script was started");
-	} else {
-		ns.run("stockmarket.js", 1); // Startup stockmarket script
-		ns.print("- Stockmarket script was started");
-	}
-	if (homeRAM < 32) return;
 
-	let ports = 0;
-	const portCheck = async () => {
-		ports = 0;
-		if (ns.fileExists("brutessh.exe", "home")) ports++
-		if (ns.fileExists("ftpcrack.exe", "home")) ports++
-		if (ns.fileExists("httpworm.exe", "home")) ports++
-		if (ns.fileExists("relaysmtp.exe", "home")) ports++
-		if (ns.fileExists("sqlinject.exe", "home")) ports++
-		return ports;
+	if(ns.gang.inGang()){
+		const runGangManager = await ns.prompt("Start the Gang Manager?", { type: "boolean" });
+		if(runGangManager){
+			ns.exec("managers/gangManager.js", "home", { threads: 1, preventDuplicates: true });
+			ns.toast("Gang manager was started", "info");
+		}
 	}
 
-	const hackingLevelUpdate = async () => {
-		const player = ns.getPlayer();
-		const oldHackLevel = Object.assign({}, player);
 
-		let currentHackLevel = oldHackLevel.hacking;
-
-		while (currentHackLevel === oldHackLevel.hacking) {
-			currentHackLevel = ns.getPlayer().hacking;
-			await ns.sleep(5000);
-			// hacking level not updated
+	if(ns.stock.hasWSEAccount() && ns.stock.hasTIXAPIAccess() && ns.stock.has4SDataTIXAPI()){
+		const runStockManager = await ns.prompt("Run Stockmarket Manager?", { type: "boolean" });
+		if(runStockManager){
+			ns.exec("/managers/stockManager.js", "home", { threads: 1, preventDuplicates: true });
+			ns.toast("Stockmarket manager was started!");
 		}
-		return oldHackLevel.hacking;
-	};
+	}
 
-	const currentTarget = new Object();
-	currentTarget.name = "";
-	currentTarget.hackLevel = 0;
-	currentTarget.ports = 0;
-	currentTarget.maxMoney = 0;
-	currentTarget.prev = "";
+	await ns.sleep(5000);
+	ns.exec("/managers/buyServer.js", "home", { threads: 1, preventDuplicates: true });
+	ns.exec("/managers/sleeveManager.js", "home", { threads: 1, preventDuplicates: true });
+	ns.exec("/managers/autoBuyer.js", "home", { threads: 1, preventDuplicates: true }); // Won't turn on if not enough RAM, as this uses singularity.
 
-	let newTarget = false;
-	const serverCheck = async (bypass) => {
-		let hackingLevel = ns.getPlayer().hacking;
-		if (!bypass) {
-			const oldHackLevel = await hackingLevelUpdate();
-			hackingLevel = ns.getPlayer().hacking;
-			ns.print(`Hacking leveled up: ${oldHackLevel} => ${hackingLevel}`);
-		}
-
-		newTarget = false;
-
-		let curTargBackup = currentTarget.name;
-		for (const server in allNetworks) {
-			const maxPorts = await portCheck();
-
-			if (allNetworks[server].name === currentTarget.name) continue
-			if (allNetworks[server].name === "home") continue;
-			if (allNetworks[server].ports > maxPorts) continue;
-			if (allNetworks[server].hackLevel > hackingLevel) continue;
-
-			if (currentTarget.maxMoney >= allNetworks[server].maxMoney) continue;
-			if (ns.getServerGrowth(allNetworks[server].name) === 0) continue;
-
-			currentTarget.name = allNetworks[server].name;
-			currentTarget.ports = allNetworks[server].ports;
-			currentTarget.hackLevel = allNetworks[server].hackLevel;
-			currentTarget.maxMoney = allNetworks[server].maxMoney;
-			newTarget = true;
-			// UPGRADE: Create array of all servers that are hackable, organise them and select best one;
-			// ns.print(`Found Potential Target: ${currentTarget.name} | Ports: ${currentTarget.ports} | Level: ${currentTarget.hackLevel} | Money: $${currentTarget.maxMoney.toLocaleString()}`)
-		};
-
-		if (newTarget) {
-			ns.toast(`New target: ${currentTarget.name} | Ports: ${currentTarget.ports} | Money: $${numberConvert(currentTarget.maxMoney)}`, "info", 15000);
-			ns.print(`New target: ${currentTarget.name} | Ports: ${currentTarget.ports} | Money: $${numberConvert(currentTarget.maxMoney)}`);
-			currentTarget.prev = curTargBackup;
-
-
-			ns.scriptKill("/adv/manageServers.js", "home");
-			if (homeRAM <= 8196) {
-				ns.scriptKill("/adv/buyServer.js", "home");
-				ns.run("/adv/buyServer.js", 1, newGame, currentTarget.name);
-				await ns.sleep(1000);
-				ns.run("/adv/manageServers.js", 1, currentTarget.name);
-			} else {
-				ns.scriptKill("/adv/optimal.js", "home");
-				ns.scriptKill("/adv/spawnOptimal.js", "home");
-				ns.scriptKill("/adv/extra/waitScript.js", "home");
-				ns.scriptKill("/scripts/optimal/hack.js", "home");
-				ns.scriptKill("/scripts/optimal/grow.js", "home");
-				ns.scriptKill("/scripts/optimal/weaken.js", "home");
-
-				ns.run("/adv/optimal.js", 1, currentTarget.name);
-
-			}
-		}
-		// if (currentTarget.name === "fulcrumasets") return;
-		await serverCheck(false);
-	};
-	await serverCheck(true);
+	// This might fix an ongoing bug...
+	// ns.mv("home", "/managers/targetManager.jsx", "/managers/targetManager.js");
+	// ns.mv("home", "/managers/targetManager.js", "/managers/targetManager.jsx");
+	ns.exec("/managers/targetManager.jsx", "home", { threads: 1, preventDuplicates: true });
 }
