@@ -66,9 +66,7 @@ export async function main(ns){
 	ns.ui.setTailTitle(`\u200b Server Buyer | Starting`);
 
 	ns.print(`${green(" Starting Script!")}`);
-	let newGame = (ns.getServerMaxRam("home") < 16384);
-
-	if(newGame === "false") newGame = false;
+	const newGame = (ns.getServerMaxRam("home") < 16384);
 
 	const baseServerRAM = (newGame) ? 64 : 8192;
 	let currentRAM = baseServerRAM; // Upgrade servers to higher RAM specs after server limit reached

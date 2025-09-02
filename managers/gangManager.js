@@ -29,7 +29,8 @@ export async function main(ns){
 	const buyingVehicles = false;
 	const buyingRootkits = false;
 	const buyingAugmentations = true;
-	const RESPECT_BEFORE_MONEY = 300000;
+	const RESPECT_BEFORE_MONEY = 1000000;
+	let maxRespect = 0;
 
 	const memberPrepped = [];
 	const membersAscended = [];
@@ -45,7 +46,7 @@ export async function main(ns){
 	const Vehicles = ["Ford Flex V20", "White Ferrari", "ATX1070 Superbike", "Mercedes-Benz S9001"];
 
 	const HackerNames = ["B00TSTR4P", "PR0T0C4LL", "CR4CK3D", "INST4LL3R", "SP1D3R", "L3G4CY", "GH0ST", "BYT3BURN3R", "ALG0R1THM", "D3BUG", "B1TCL0UD", "T3RM1N4L"];
-	const CriminalNames = ["Nightfang", "Swiftbolt", "Stormblood", "Fireheart", "Redflayer", "Boneblade", "Bloodclaw", "Brighthair", "Doomthorn", "Wildsorrow", "Ryder", "Mantle"];
+	const CriminalNames = ["Nightfang", "Dawnwing", "Stormblood", "Fireheart", "Redflayer", "Boneblade", "Bloodclaw", "Brighthair", "Doomthorn", "Wildsorrow", "Ryder", "Mantle"];
 	const MemberNames = isHacking ? HackerNames : CriminalNames;
 
 	/*
@@ -95,6 +96,9 @@ export async function main(ns){
 		let msg = "    " + TextTransforms.apply(waitteam, [TextTransforms.Color.LPurple]) + "\n";
 		if(waitteam.length === 0) msg = "    Gang has been maxed out.\n";
 		ns.print(msg);
+
+		if(gangInfo.respect > maxRespect) maxRespect = gangInfo.respect;
+		const minRespect = maxRespect * 0.5;
 
 
 		// RECRUIT
@@ -220,7 +224,7 @@ export async function main(ns){
 
 			// ASCEND
 			try {
-				const memberInfo = ns.gang.getMemberInformation(mem); // Get entire gang meber onject from name.
+				const memberInfo = ns.gang.getMemberInformation(mem); // Get entire gang member object from name.
 				const ascResult = ns.gang.getAscensionResult(mem); // Get the result of an ascension without ascending.
 
 				if(ascResult != undefined){
@@ -258,8 +262,11 @@ export async function main(ns){
                     */
 					if(doAsc){
 						await ns.sleep(50);
-						Ascend(mem); // ascend the member
-						membersAscended.push(mem); // let this grow.
+						// As long as ascending doesn't drop us below 50% of our max respect we've ever achieved, ascend
+						if(gangInfo.respect - memberInfo.earnedRespect > minRespect){
+							Ascend(mem); // ascend the member
+							membersAscended.push(mem); // let this grow.
+						}
 					}
 				}
 			} catch {

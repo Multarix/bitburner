@@ -89,7 +89,7 @@ function WGWH(props){
 	if(props.stage === "w") return <Colors color="red"><Colors color="lime">W</Colors>GWH</Colors>;
 	if(props.stage === "wg") return <Colors color="red">W<Colors color="lime">G</Colors>WH</Colors>;
 	if(props.stage === "wgw") return <Colors color="red">WG<Colors color="lime">W</Colors>H</Colors>;
-	if(props.stage === "wgwh") return <Colors color="red">WGW<Colors color="lime">W</Colors></Colors>;
+	if(props.stage === "wgwh") return <Colors color="red">WGW<Colors color="lime">H</Colors></Colors>;
 }
 
 

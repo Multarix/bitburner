@@ -15,7 +15,7 @@ async function spawnExec(ns, type, threads, target, delay = 0){
 	ns.exec(`/scripts/single/${type}.js`, "home", Math.max(threads, 1), target);
 }
 
-const gap = 1000; // Gap between each grow/weak/hack execution hitting
+const gap = 2000; // Gap between each grow/weak/hack execution hitting
 
 /** @param {NS} ns */
 export async function main(ns){
