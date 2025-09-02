@@ -19,11 +19,7 @@ export class TextTransforms {
 	static Color = {
 		ChartsGray: { Type: "Color", Value: 245 }, // grey
 		ChartsGreen: { Type: "Color", Value: 77 }, // green
-
-		ChartsGray: { Type: "Color", Value: 245 }, // grey
 		ChartsBlue: { Type: "Color", Value: 32 }, // blue
-
-		ChartsGray: { Type: "Color", Value: 245 }, // grey
 		ChartsCoral: { Type: "Color", Value: 202 }, // coral
 
 		Black: { Type: "Color", Value: 16 },
@@ -56,6 +52,8 @@ export class TextTransforms {
 	/** Apply xTerm Text Modifications
 	 @param {string} text
 	 @param {any[]} transforms
+	 @remarks
+	 TextTransforms.apply("text", [TextTransforms.Color.LGreen]));
 	*/
 	static apply(text, transforms){
 		const prefix = [];
@@ -66,19 +64,26 @@ export class TextTransforms {
 			if(transform.Type != undefined && Number.isFinite(transform.Value)){
 				if(transform.Type === 'Highlight'){
 					code.push(`${this.#background}${transform.Value};`);
-				} else if(transform.Type === 'Transform'){
+				}
+
+				if(transform.Type === 'Transform'){
 					prefix.push(`${transform.Value};`);
-				} else if(transform.Type === 'Color'){
+				}
+
+				if(transform.Type === 'Color'){
 					code.push(`${this.#foreground}${transform.Value};`);
 				}
 			}
 		}
+
 		if(prefix.length > 0){
 			apply += prefix.join('');
 		}
+
 		if(code.length > 0){
 			apply += code.join('');
 		}
+
 		if(apply.length > 0){
 			apply = `${this.#escapeCode}${apply}${this.#endCode}`;
 		}
@@ -86,5 +91,7 @@ export class TextTransforms {
 		apply += `${text}${this.#reset}`;
 
 		return `${apply}`;
+
+		// Lime Green: \x1b[38;5;155
 	}
 }

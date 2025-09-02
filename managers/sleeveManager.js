@@ -1,4 +1,4 @@
-import { magenta, yellow, cyan, green, white } from "helpers/Functions";
+import { red, blue, magenta, Color, cyan, green, white } from "helpers/Functions";
 
 const IGNORE_SYNC_SHOCK = false; // Toggle this if sleeves should ignore trying to recover or sync
 
@@ -44,6 +44,7 @@ const sleeves = {}; // This is global so it technically persists through an rest
  * @property {number} def
  * @property {number} dex
  * @property {number} agi
+ * @property {number} hack
  * @property {string} activity
  * @property {CrimeData} crime
  */
@@ -58,21 +59,22 @@ const sleeves = {}; // This is global so it technically persists through an rest
 function sleeveLog(sleeveInfo, numSleeves){
 	const preceedingZeros = numSleeves.toString().length;
 	const sleeveIDString = sleeveInfo.id.toString().padStart(preceedingZeros + 1, "0");
-	const sleeveID = yellow(`Sleeve-${sleeveIDString}`);
-	const syncLevel = magenta(sleeveInfo.sync.toFixed(3).padStart(7, " "));
-	const shockLevel = magenta(sleeveInfo.shock.toFixed(3).padStart(6, " "));
+	const sleeveID = Color.set(`Sleeve-${sleeveIDString}`, Color.enum.LightYellow);
+	const syncLevel = Color.set(sleeveInfo.sync.toFixed(3).padStart(7, " ") + "%", Color.enum.LightBlue);
+	const shockLevel = Color.set(sleeveInfo.shock.toFixed(3).padStart(6, " ") + "%", Color.enum.LightRed);
 
-	const str = cyan(sleeveInfo.str.toString().padStart(3, " "));
-	const def = cyan(sleeveInfo.def.toString().padStart(3, " "));
-	const dex = cyan(sleeveInfo.dex.toString().padStart(3, " "));
-	const agi = cyan(sleeveInfo.agi.toString().padStart(3, " "));
+	const hack = cyan(sleeveInfo.hack.toString().padStart(4, " "));
+	const str = cyan(sleeveInfo.str.toString().padStart(4, " "));
+	const def = cyan(sleeveInfo.def.toString().padStart(4, " "));
+	const dex = cyan(sleeveInfo.dex.toString().padStart(4, " "));
+	const agi = cyan(sleeveInfo.agi.toString().padStart(4, " "));
 
 
 	const crimeChance = (sleeveInfo.crime.chance * 100).toFixed(2);
 	const activity = (sleeveInfo.crime.isCrime) ? `${green(sleeveInfo.activity)} [${cyan(crimeChance + "%")}]` : green(sleeveInfo.activity);
 
 	// Sleeve #1  -  Sync: 98.245 | Shock: 0 | STR: 0001 | DEF: 0001 | DEX: 0001| AGI: 0001 | Activity: Synchronizing
-	return ` ${sleeveID}  \u001b[37m-  Sync: ${syncLevel} \u001b[37m| Shock: ${shockLevel} \u001b[37m| STR: ${str} \u001b[37m| DEF: ${def} \u001b[37m| DEX: ${dex} \u001b[37m| AGI: ${agi} \u001b[37m| Activity: ${activity}`;
+	return ` 🤖 ${sleeveID} \u001b[37m- 🔄 ${syncLevel} \u001b[37m| 💢 ${shockLevel} \u001b[37m| 🌐 ${hack} \u001b[37m| 💪 ${str} \u001b[37m| 🛡️ ${def} \u001b[37m| 🙌 ${dex} \u001b[37m| 🏃 ${agi} \u001b[37m| Activity: ${activity}`;
 }
 
 
@@ -85,14 +87,6 @@ export async function main(ns){
 	const CityName = ns.enums.CityName;
 	const LocationNames = ns.enums.LocationName;
 	const GymType = ns.enums.GymType;
-
-	/* ********************** */
-	/*                        */
-	/*       Additional       */
-	/*        Settings        */
-	/*                        */
-	/* ********************** */
-
 
 	while(true){
 		const numSleeves = ns.sleeve.getNumSleeves();
@@ -143,26 +137,16 @@ export async function main(ns){
 			if(sleeve.sync >= MAX_SYNC) sleeveData.shouldSync = false;
 
 			if(!IGNORE_SYNC_SHOCK){
-				if(sleeveData.shouldRecover){ // Recover before we do anything with it
-					const amountToSync = (100 - sleeve.sync);
-					if(amountToSync > sleeve.shock * SYNC_SHOCK_RATIO){
-						// The amount to sync is {SyncShockRatio} the shock, thus by the time sync is at 100, shock should be at 0.
-						// This is a minor optimisation to take advantage of the fact shock goes down even when not focusing it.
-						if(currentTask?.type !== "SYNCHRO") ns.sleeve.setToSynchronize(sleeveID);
-						sleeveData.activity = "Synchronizing";
-						sleeveData.crime.isCrime = false;
-						continue;
-					}
-
-					if(currentTask?.type !== "RECOVERY") ns.sleeve.setToShockRecovery(sleeveID);
-					sleeveData.activity = "Shock Recovery";
+				if(sleeveData.shouldSync){ // Sync before we do anything with it
+					if(currentTask?.type !== "SYNCHRO") ns.sleeve.setToSynchronize(sleeveID);
+					sleeveData.activity = "Synchronizing";
 					sleeveData.crime.isCrime = false;
 					continue;
 				}
 
-				if(sleeveData.shouldSync){ // Sync before we do anything with it
-					if(currentTask?.type !== "SYNCHRO") ns.sleeve.setToSynchronize(sleeveID);
-					sleeveData.activity = "Synchronizing";
+				if(sleeveData.shouldRecover){ // Recover before we do anything with it
+					if(currentTask?.type !== "RECOVERY") ns.sleeve.setToShockRecovery(sleeveID);
+					sleeveData.activity = "Shock Recovery";
 					sleeveData.crime.isCrime = false;
 					continue;
 				}
@@ -256,6 +240,7 @@ export async function main(ns){
 				def: sleeve.skills.defense,
 				dex: sleeve.skills.dexterity,
 				agi: sleeve.skills.agility,
+				hack: sleeve.skills.hacking,
 				activity: sleeveData.activity,
 				crime: sleeveData.crime
 			};
@@ -273,7 +258,8 @@ export async function main(ns){
 		ns.print(sleeveInfo.join("\n"));
 		ns.ui.setTailTitle(`\u200b Managing ${totalSleeves} sleeve${(totalSleeves > 1) ? "s" : ""}`);
 
-		ns.ui.resizeTail(1285, 87 + (25 * totalSleeves));
+		ns.ui.resizeTail(1135, 77 + (22 * totalSleeves));
+		ns.ui.setTailFontSize(14);
 
 		await ns.sleep(100);
 	}

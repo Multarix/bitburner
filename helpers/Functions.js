@@ -260,3 +260,85 @@ export function cyan(text){
 export function white(text){
 	return "\u001b[37m" + text + "\u001b[0m";
 };
+
+
+/**
+ * @typedef {"Black"|"LBrown"|"DRed"|"Red"|"LRed"|"Orange"|"Yellow"|"LYellow"|"DGreen"|"Green"|"LGreen"|"DBlue"|"Blue"|"Cyan"|"LCyan"|"Magenta"|"DPurple"|"Purple"|"LPurple"|"White"|"LWhite"} ValidColor
+ */
+
+/**
+ * Advanced Color Creator
+ * @export
+ * @class Color
+ */
+export class Color {
+	/**
+	 * @private
+	 * @memberof Color
+	 * Scroll to 8-Bit:
+	 * https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters
+	 */
+	static #ValidColors = {
+		black:  16,
+		lbrown: 130,
+		dred: 52,
+		red: 124,
+		lred: 196,
+		orange: 202,
+		yellow: 226,
+		lyellow: 229,
+		dgreen: 22,
+		green: 46,
+		lgreen: 155,
+		dblue: 17,
+		blue: 63,
+		lblue: 32,
+		cyan: 30,
+		lcyan: 122,
+		magenta: 13,
+		dpurple: 55,
+		purple: 201,
+		lpurple: 206,
+		white: 188,
+		lwhite: 231
+	};
+
+	static enum = {
+		Black:  "black",
+		LightBrown: "lbrown",
+		DarkRed: "dred",
+		Red: "red",
+		LightRed: "lred",
+		Orange: "orange",
+		Yellow: "yellow",
+		LightYellow: "lyellow",
+		DarkGreen: "dgreen",
+		Green: "green",
+		LightGreen: "lgreen",
+		DarkBlue: "dblue",
+		Blue: "blue",
+		LightBlue: "lblue",
+		Cyan: "cyan",
+		LightCyan: "lcyan",
+		Magenta: "magenta",
+		DarkPurple: "dpurple",
+		Purple: "purple",
+		LightPurple: "lpurple",
+		White: "white",
+		LightWhite: "lWhite"
+	};
+
+
+
+	/**
+	 * @static
+	 * @param {string} text
+	 * @param {ValidColor} color
+	 * @memberof Color
+	 */
+	static set(text, color){
+		color = color.toLowerCase();
+		if((this.#ValidColors[color] ?? null) === null) throw "That color is not supported!";
+		return `\x1b[38;5;${this.#ValidColors[color]}m${text}\x1b[m`;
+	}
+}

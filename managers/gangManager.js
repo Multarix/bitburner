@@ -29,7 +29,7 @@ export async function main(ns){
 	const buyingVehicles = false;
 	const buyingRootkits = true;
 	const buyingAugmentations = true;
-	const RESPECT_BEFORE_MONEY = 1000000;
+	const RESPECT_BEFORE_MONEY = 100000000;
 	let maxRespect = 0;
 
 	const memberPrepped = [];
