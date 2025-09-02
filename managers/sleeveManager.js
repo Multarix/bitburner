@@ -1,6 +1,6 @@
 import { magenta, yellow, cyan, green, white } from "helpers/Functions";
 
-const IGNORE_SYNC_SHOCK = true; // Toggle this if sleeves should ignore trying to recover or sync
+const IGNORE_SYNC_SHOCK = false; // Toggle this if sleeves should ignore trying to recover or sync
 
 const TRAINING_THRESHOLD = 35;
 const MIN_SYNC = 95;
@@ -8,7 +8,7 @@ const MAX_SYNC = 100;
 const MAX_SHOCK = 5;
 const MIN_SHOCK = 0;
 const TRAVEL_COST = 200000;
-const BUY_AUGMENTS = false;
+const BUY_AUGMENTS = true;
 
 // Shock goes down even when focusing on other tasks, so we can focus
 // on syncing rather than shock recovery in certain situations.
@@ -113,12 +113,18 @@ export async function main(ns){
 
 
 		// Buy Augments
-		// if(BUY_AUGMENTS){
-		// 	for(const [ID, sleeveData] of Object.entries(sleeves)){
-		// 		const sleeveID = parseInt(ID);
-		// 		const availableAugments = ns.sleeve.getSleevePurchasableAugs(sleeveID);
-		// 	}
-		// }
+		if(BUY_AUGMENTS){
+			for(const [ID, _sleeveData] of Object.entries(sleeves)){
+				const sleeveID = parseInt(ID);
+				const sleeve = ns.sleeve.getSleeve(sleeveID);
+				if(sleeve.shock > 0) continue;
+
+				const availableAugments = ns.sleeve.getSleevePurchasableAugs(sleeveID);
+				for(const augment of availableAugments){
+					if(ns.getPlayer().money > augment.cost) ns.sleeve.purchaseSleeveAug(sleeveID, augment.name);
+				}
+			}
+		}
 
 
 		// Set Activity
@@ -163,10 +169,10 @@ export async function main(ns){
 			}
 
 			// If any of our skills are below the training threshold...
-			if(skills.strength < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.strength_exp) ||
-			skills.defense < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.defense_exp) ||
-			skills.dexterity < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.dexterity_exp) ||
-			skills.agility < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.agility_exp)){
+			if(skills.strength < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.strength_exp * sleeve.mults.strength) ||
+			skills.defense < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.defense_exp * sleeve.mults.defense) ||
+			skills.dexterity < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.dexterity_exp * sleeve.mults.dexterity) ||
+			skills.agility < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.agility_exp * sleeve.mults.agility)){
 				// Move to Sector12, best gym is there
 				if(sleeve.city !== CityName.Sector12){
 					if(ns.getPlayer().money > TRAVEL_COST){
@@ -180,7 +186,7 @@ export async function main(ns){
 				}
 
 				// Send Sleeve to the gym if under the threshold for any given skill
-				if(skills.strength < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.strength_exp)){
+				if(skills.strength < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.strength)){
 					if(currentTask?.classType !== GymType.strength || currentTask?.location !== LocationNames.Sector12PowerhouseGym){
 						ns.sleeve.setToGymWorkout(sleeveID, LocationNames.Sector12PowerhouseGym, GymType.strength);
 					}
@@ -189,7 +195,7 @@ export async function main(ns){
 					continue;
 				}
 
-				if(skills.defense < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.defense_exp)){
+				if(skills.defense < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.defense)){
 					if(currentTask?.classType !== GymType.defense || currentTask?.location !== LocationNames.Sector12PowerhouseGym){
 						ns.sleeve.setToGymWorkout(sleeveID, LocationNames.Sector12PowerhouseGym, GymType.defense);
 					}
@@ -198,7 +204,7 @@ export async function main(ns){
 					continue;
 				}
 
-				if(skills.dexterity < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.dexterity_exp)){
+				if(skills.dexterity < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.dexterity)){
 					if(currentTask?.classType !== GymType.dexterity || currentTask?.location !== LocationNames.Sector12PowerhouseGym){
 						ns.sleeve.setToGymWorkout(sleeveID, LocationNames.Sector12PowerhouseGym, GymType.dexterity);
 					}
@@ -207,7 +213,7 @@ export async function main(ns){
 					continue;
 				}
 
-				if(skills.agility < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.agility_exp)){
+				if(skills.agility < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.agility)){
 					if(currentTask?.classType !== GymType.agility || currentTask?.location !== LocationNames.Sector12PowerhouseGym){
 						ns.sleeve.setToGymWorkout(sleeveID, LocationNames.Sector12PowerhouseGym, GymType.agility);
 					}
@@ -223,9 +229,9 @@ export async function main(ns){
 			if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.mug) > 0.9) crimeToCommit = CrimeType.mug;
 			if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.homicide) > 0.25) crimeToCommit = CrimeType.homicide;
 			if(ns.gang.inGang()){
-				if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.grandTheftAuto) > 0.80) crimeToCommit = CrimeType.grandTheftAuto;
-				if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.assassination) > 0.85) crimeToCommit = CrimeType.assassination;
-				if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.heist) > 0.90) crimeToCommit = CrimeType.heist;
+				if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.grandTheftAuto) > 0.75) crimeToCommit = CrimeType.grandTheftAuto;
+				if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.assassination) > 0.80) crimeToCommit = CrimeType.assassination;
+				if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.heist) > 0.85) crimeToCommit = CrimeType.heist;
 			}
 
 
@@ -267,7 +273,7 @@ export async function main(ns){
 		ns.print(sleeveInfo.join("\n"));
 		ns.ui.setTailTitle(`\u200b Managing ${totalSleeves} sleeve${(totalSleeves > 1) ? "s" : ""}`);
 
-		ns.ui.resizeTail(1250, 87 + (27 * totalSleeves));
+		ns.ui.resizeTail(1285, 87 + (25 * totalSleeves));
 
 		await ns.sleep(100);
 	}

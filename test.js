@@ -116,6 +116,32 @@ function pos(ns){
 
 
 /** @param {NS} ns **/
+function crimes(ns){
+	ns.ui.closeTail();
+
+	const crimeTypes = ns.enums.CrimeType;
+	const crimes = [
+		crimeTypes.assassination,
+		crimeTypes.bondForgery,
+		crimeTypes.grandTheftAuto,
+		crimeTypes.heist,
+		crimeTypes.homicide,
+		crimeTypes.kidnap,
+		crimeTypes.larceny,
+		crimeTypes.mug,
+		crimeTypes.robStore,
+		crimeTypes.shoplift,
+		crimeTypes.traffickArms
+	];
+
+	for(const crime of crimes){
+		const gains = ns.formulas.work.crimeGains(ns.getPlayer(), crime);
+		// const x = ns.singularity.getCrimeStats;
+	}
+}
+
+
+/** @param {NS} ns **/
 export async function main(ns){
 	ns.disableLog("ALL");
 	ns.ui.openTail();
@@ -127,6 +153,7 @@ export async function main(ns){
 	if(argument === "pos") pos(ns);
 	if(argument === "xp") xp(ns);
 	if(argument === "scan") ns.print(scanNetworks(ns, "home", true));
+	if(argument === "crime") crimes(ns);
 	if(argument === "player"){
 		const player = ns.getPlayer();
 		const killed = player.numPeopleKilled;

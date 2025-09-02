@@ -27,7 +27,7 @@ export async function main(ns){
 	const buyingWeapons = false;
 	const buyingArmor = false;
 	const buyingVehicles = false;
-	const buyingRootkits = false;
+	const buyingRootkits = true;
 	const buyingAugmentations = true;
 	const RESPECT_BEFORE_MONEY = 1000000;
 	let maxRespect = 0;
@@ -71,12 +71,12 @@ export async function main(ns){
 		const money = ns.getServerMoneyAvailable("home");
 		const gangInfo = ns.gang.getGangInformation();
 		const gangIncome = ns.gang.getGangInformation().moneyGainRate * 5; // A tick is every 200ms. To get the actual money/sec, multiple moneyGainRate by 5.
-		const gangRespect = FormatNumber(ns.gang.getGangInformation().respect);
-		const nextRecruit = FormatNumber(ns.gang.respectForNextRecruit());
+		const gangRespect = ns.formatNumber(ns.gang.getGangInformation().respect);
+		const nextRecruit = ns.formatNumber(ns.gang.respectForNextRecruit());
 
 		ns.print(` 🌆 Gang: ${TextTransforms.apply(gangInfo.faction, [TextTransforms.Color.Orange])} ${isHacking ? "💻" : "⚔️"}`);
-		ns.print(" 🏦 Money Available: " + TextTransforms.apply("$" + FormatNumber(money), [TextTransforms.Color.LGreen]));
-		ns.print(" 💵 Gang Income/sec: " + TextTransforms.apply("$" + FormatNumber(gangIncome), [TextTransforms.Color.LGreen]));
+		ns.print(" 🏦 Money Available: " + TextTransforms.apply("$" + ns.formatNumber(money), [TextTransforms.Color.LGreen]));
+		ns.print(" 💵 Gang Income/sec: " + TextTransforms.apply("$" + ns.formatNumber(gangIncome), [TextTransforms.Color.LGreen]));
 		ns.print(" 🦾 Gang Respect: " + TextTransforms.apply(gangRespect, [TextTransforms.Color.LPurple]));
 		if(ns.gang.getMemberNames().length < 12) ns.print(" 🙍 Next Recruit: " + TextTransforms.apply(nextRecruit, [TextTransforms.Color.Red]));
 

@@ -61,10 +61,12 @@ export async function main(ns){
 	// ns.ui.openTail();
 	ns.disableLog("ALL");
 	ns.print("Script Started");
+	ns.ui.openTail();
 
-	const HACKNET_LIMIT = (ns.getServerMaxRam("home") > 4096) ? 24 : 6;
-	while(ns.hacknet.numNodes() < HACKNET_LIMIT){
-		let hackNodesMaxed = false;
+	const NORMAL_LIMIT = (ns.getServerMaxRam("home") > 4096) ? 24 : 6;
+	const HACKNET_LIMIT = Math.max(ns.hacknet.numNodes(), NORMAL_LIMIT);
+	let hackNodesMaxed = false;
+	while(!hackNodesMaxed || ns.hacknet.numNodes() <= HACKNET_LIMIT){
 		while(!hackNodesMaxed){
 			const upgrade = new Object();
 			upgrade.type = undefined;
@@ -157,7 +159,7 @@ export async function main(ns){
 				ns.print(buyMessage);
 			}
 
-			const sleepTime = (bought) ? 100 : 10000;
+			const sleepTime = (bought) ? 10 : 10000;
 			await ns.sleep(sleepTime);
 		}
 	}
