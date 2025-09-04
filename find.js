@@ -12,8 +12,6 @@ const factions = {
 /** @param {NS} ns **/
 export async function main(ns){
 	const target = ns.args[0];
-
-
 	if(target === "factions"){
 		for(const faction in factions){
 			const serverName = factions[faction];

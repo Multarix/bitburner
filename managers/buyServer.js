@@ -68,7 +68,8 @@ export async function main(ns){
 	ns.print(`${green(" Starting Script!")}`);
 	const newGame = (ns.getServerMaxRam("home") < 16384);
 
-	const baseServerRAM = (newGame) ? 64 : 8192;
+	// Min ram of servers bought should be at least half of what home is
+	const baseServerRAM = (newGame) ? ns.getServerMaxRam("home") / 2 : 8192;
 	let currentRAM = baseServerRAM; // Upgrade servers to higher RAM specs after server limit reached
 
 	// Buy servers

@@ -9,8 +9,7 @@ const addCustomStyle = () => {
 		border-radius: 0px;
 		font-weight: 1000;
 		background-color: #333;
-		padding: 1px 0.5em;
-		width: 4em;
+		padding: 0.8em 0.5em;
 		
 		&:hover {
 			background-color: #555;
@@ -39,6 +38,9 @@ const copyBtnStyle = {
 
 
 function CopyButton(props){
+	const command = props.command;
+	const buttonText = props.text || "Copy";
+
 	let randID = "";
 	for(let i = 0; i < 10; i++){
 		const randChar = Math.floor(Math.random() * randomArray.length);
@@ -46,21 +48,32 @@ function CopyButton(props){
 	}
 
 	return <button id={randID} class={"custom-copyBtn"} onClick={() => {
-		navigator.clipboard.writeText(props.toCopy);
-		eval(`document.getElementById(randID).innerText = "✔️"
-		setTimeout(() => {
-			document.getElementById(randID).innerText = "Copy";
-		}, 3000);`);
-	}}>Copy</button>;
+		eval(`
+			const terminalInput = document.getElementById("terminal-input");
+			terminalInput.value = command;
+			const handler = Object.keys(terminalInput)[1];
+			terminalInput[handler].onChange({ target: terminalInput });
+			terminalInput[handler].onKeyDown({ keyCode: 13, preventDefault: () => null });
+
+			document.getElementById(randID).innerText = "✔️"
+			setTimeout(() => {
+				document.getElementById(randID).innerText = "Copy";
+			}, 3000);
+		`);
+	}}>{buttonText}</button>;
 }
 
 /** @param {NS} ns **/
 export async function main(ns){
 	eval(`if(!document.getElementById("customBtnCopy")) addCustomStyle();`);
+	const name = ns.args[0];
+	const commandToRun = ns.args[1];
+	const hackingLevel = ns.args[2];
+	const buttonText = ns.args[3];
 
 
-	const factionName = <Colors color={"white"}>{ns.args[0]} (Req: {ns.args[2].toString().padStart(5, " ")})</Colors>;
-	const factionLocation = <CopyButton toCopy={ns.args[1]}/>;
+	const factionName = <Colors color={"white"}>{name} (Req: {hackingLevel.toString().padStart(5, " ")})</Colors>;
+	const factionLocation = <CopyButton command={commandToRun} text={buttonText}/>;
 
 	ns.tprintRaw(<>{factionName} {factionLocation}</>);
 }

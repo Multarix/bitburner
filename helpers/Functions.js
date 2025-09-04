@@ -28,17 +28,62 @@ export function scanNetworks(ns, hostName, clear = false){
 
 
 /**
- *
+ * @typedef {Object} ProgressBarItem
+ * @property {string} value
+ * @property {string} [startOverride]
+ * @property {string} [endOverride]
+ */
+
+
+/**
+ * @name FiraCodeLoading
+ * @property {ProgressBarItem} filled
+ * @property {ProgressBarItem} empty
+ */
+export const FiraCodeLoading = {
+	filled: {
+		default: "",
+		startOverride: "",
+		endOverride: ""
+	},
+	empty: {
+		default: "",
+		startOverride: "",
+		endOverride: ""
+	}
+};
+
+/**
+ * Makes a progress bar
  * @param {number} progress A number that is greater or equal to 0, but less than or equal to 1
- * @param {string} filled The string that will be used represent filled portions of the bar
- * @param {string} empty The string that will be used to represent empty portions of the bar
+ * @param {ProgressBarItem|string} filled The string that will be used represent filled portions of the bar
+ * @param {ProgressBarItem|string} empty The string that will be used to represent empty portions of the bar
  */
 export function progressBar(progress, filled = "#", empty = " "){
 	if(typeof progress !== "number") throw "progress is not a number!";
 	if(progress > 1 || 0 > progress) throw "progress must be between 0 and 1";
 
+	/** @type {string} */
+	const filledString = filled.default || filled;
+	/** @type {string} */
+	const emptyString = empty.default || empty;
+
+	/** @type {string} */
+	const filledStart = filled.startOverride || filledString;
+	/** @type {string} */
+	const emptyStart = empty.startOverride || emptyString;
+
+	/** @type {string} */
+	const filledEnd = filled.endOverride || filledString;
+	/** @type {string} */
+	const emptyEnd = empty.endOverride || emptyString;
+
 	const multTen = Math.round(progress * 10);
-	const progressBarStr = "".padEnd(multTen, filled).padEnd(10, empty);
+
+	let progressBarStr = (multTen >= 1) ? filledStart : emptyStart;
+	progressBarStr = progressBarStr.padEnd(multTen, filledString).padEnd(10, emptyString);
+	progressBarStr += (multTen === 10) ? filledEnd : emptyEnd;
+
 	return progressBarStr;
 }
 
@@ -263,82 +308,73 @@ export function white(text){
 
 
 /**
- * @typedef {"Black"|"LBrown"|"DRed"|"Red"|"LRed"|"Orange"|"Yellow"|"LYellow"|"DGreen"|"Green"|"LGreen"|"DBlue"|"Blue"|"Cyan"|"LCyan"|"Magenta"|"DPurple"|"Purple"|"LPurple"|"White"|"LWhite"} ValidColor
- */
-
-/**
- * Advanced Color Creator
- * @export
- * @class Color
+ * Advanced Text Formatter
+ * https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters
  */
 export class Color {
 	/**
-	 * @private
 	 * @memberof Color
-	 * Scroll to 8-Bit:
-	 * https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters
 	 */
-	static #ValidColors = {
-		black:  16,
-		lbrown: 130,
-		dred: 52,
-		red: 124,
-		lred: 196,
-		orange: 202,
-		yellow: 226,
-		lyellow: 229,
-		dgreen: 22,
-		green: 46,
-		lgreen: 155,
-		dblue: 17,
-		blue: 63,
-		lblue: 32,
-		cyan: 30,
-		lcyan: 122,
+	static preset = {
+		black: 16,
+		lightGray: 252,
+		gray: 245,
+		darkGray: 238,
+		lightBrown: 130,
+		darkRed: 1,
+		red: 9,
+		lightOrange: 220,
+		orange: 208,
+		darkOrange: 166,
+		yellow: 11,
+		lightYellow: 228,
+		aqua: 31,
+		lime: 10,
+		darkGreen: 2,
+		green: 34,
+		lightGreen: 120,
+		darkBlue: 4,
+		blue: 12,
+		lightBlue: 45,
+		darkCyan: 6,
+		cyan: 14,
+		lightCyan: 87,
 		magenta: 13,
-		dpurple: 55,
-		purple: 201,
-		lpurple: 206,
-		white: 188,
-		lwhite: 231
+		darkPurple: 5,
+		purple: 129,
+		lightPurple: 141,
+		white: 15
 	};
 
-	static enum = {
-		Black:  "black",
-		LightBrown: "lbrown",
-		DarkRed: "dred",
-		Red: "red",
-		LightRed: "lred",
-		Orange: "orange",
-		Yellow: "yellow",
-		LightYellow: "lyellow",
-		DarkGreen: "dgreen",
-		Green: "green",
-		LightGreen: "lgreen",
-		DarkBlue: "dblue",
-		Blue: "blue",
-		LightBlue: "lblue",
-		Cyan: "cyan",
-		LightCyan: "lcyan",
-		Magenta: "magenta",
-		DarkPurple: "dpurple",
-		Purple: "purple",
-		LightPurple: "lpurple",
-		White: "white",
-		LightWhite: "lWhite"
+	static style = {
+		bold: 1,
+		italic: 3,
+		underline: 4,
+		strikethough: 9
 	};
-
-
 
 	/**
 	 * @static
 	 * @param {string} text
-	 * @param {ValidColor} color
+	 * @param {number} foreground
+	 * @param {number} background
+	 * @param {number[]} style
 	 * @memberof Color
 	 */
-	static set(text, color){
-		color = color.toLowerCase();
-		if((this.#ValidColors[color] ?? null) === null) throw "That color is not supported!";
-		return `\x1b[38;5;${this.#ValidColors[color]}m${text}\x1b[m`;
+	static set(text, foreground, background, styles){
+		foreground = parseInt(foreground);
+		if(isNaN(foreground) || foreground > 255 || foreground < 0) throw "That forground color is not supported!";
+
+		// background = parseInt(background);
+		// if(isNaN(background) || background > 255 || background < 0) throw "That background color is not supported!";
+
+		// const foregroundCode = `38;5;${foreground}`;
+		// const backgroundCode = `48;5;${background}`;
+		// const styleCode = styles.join(";") || "0";
+
+		// `\x1b[${styleCode};${foregroundCode};${backgroundCode}m${text}\x1b[m`;
+
+		// TODO: Add Support for foreground, background and style as above
+		return `\x1b[0;38;5;${foreground}m${text}\x1b[m`;
 	}
 }

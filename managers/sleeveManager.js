@@ -1,18 +1,14 @@
-import { red, blue, magenta, Color, cyan, green, white } from "helpers/Functions";
+import { Color, cyan, white } from "helpers/Functions";
 
-const IGNORE_SYNC_SHOCK = false; // Toggle this if sleeves should ignore trying to recover or sync
+const IGNORE_SYNC_SHOCK = true; // Toggle this if sleeves should ignore trying to recover or sync
 
-const TRAINING_THRESHOLD = 35;
+const TRAINING_THRESHOLD = 40;
 const MIN_SYNC = 95;
 const MAX_SYNC = 100;
 const MAX_SHOCK = 5;
 const MIN_SHOCK = 0;
 const TRAVEL_COST = 200000;
 const BUY_AUGMENTS = true;
-
-// Shock goes down even when focusing on other tasks, so we can focus
-// on syncing rather than shock recovery in certain situations.
-const SYNC_SHOCK_RATIO = 2;
 
 
 /**
@@ -30,11 +26,6 @@ const SYNC_SHOCK_RATIO = 2;
  * @property {CrimeData} crime
  **/
 
-
-/** @type {Object<string, SleeveData>} */
-const sleeves = {}; // This is global so it technically persists through an restart but I ain't holdin' my breath on that theory
-
-
 /**
  * @typedef SleeveInfo
  * @property {number} id
@@ -49,7 +40,6 @@ const sleeves = {}; // This is global so it technically persists through an rest
  * @property {CrimeData} crime
  */
 
-
 /**
  *
  * @param {SleeveInfo} sleeveInfo
@@ -59,22 +49,31 @@ const sleeves = {}; // This is global so it technically persists through an rest
 function sleeveLog(sleeveInfo, numSleeves){
 	const preceedingZeros = numSleeves.toString().length;
 	const sleeveIDString = sleeveInfo.id.toString().padStart(preceedingZeros + 1, "0");
-	const sleeveID = Color.set(`Sleeve-${sleeveIDString}`, Color.enum.LightYellow);
-	const syncLevel = Color.set(sleeveInfo.sync.toFixed(3).padStart(7, " ") + "%", Color.enum.LightBlue);
-	const shockLevel = Color.set(sleeveInfo.shock.toFixed(3).padStart(6, " ") + "%", Color.enum.LightRed);
+	const sleeveID = Color.set(`Sleeve-${sleeveIDString} -`, Color.preset.white);
+	const syncLevel = `🔄 ${Color.set(sleeveInfo.sync.toFixed(3).padStart(7, " ") + "%", Color.preset.lightBlue)}`;
+	const shckLevel = `⚠️ ${Color.set(sleeveInfo.shock.toFixed(3).padStart(6, " ") + "%", Color.preset.lightYellow)}`;
 
-	const hack = cyan(sleeveInfo.hack.toString().padStart(4, " "));
-	const str = cyan(sleeveInfo.str.toString().padStart(4, " "));
-	const def = cyan(sleeveInfo.def.toString().padStart(4, " "));
-	const dex = cyan(sleeveInfo.dex.toString().padStart(4, " "));
-	const agi = cyan(sleeveInfo.agi.toString().padStart(4, " "));
+	const hck = `💻 ${Color.set(sleeveInfo.hack.toString().padStart(4, "·"), Color.preset.lightPurple)}`;
+	const str = `💪 ${Color.set(sleeveInfo.str.toString().padStart(4, "·"), Color.preset.lightPurple)}`;
+	const def = `🛡️ ${Color.set(sleeveInfo.def.toString().padStart(4, "·"), Color.preset.lightPurple)}`;
+	const dex = `🖐️ ${Color.set(sleeveInfo.dex.toString().padStart(4, "·"), Color.preset.lightPurple)}`;
+	const agi = `🦶 ${Color.set(sleeveInfo.agi.toString().padStart(4, "·"), Color.preset.lightPurple)}`;
 
 
 	const crimeChance = (sleeveInfo.crime.chance * 100).toFixed(2);
-	const activity = (sleeveInfo.crime.isCrime) ? `${green(sleeveInfo.activity)} [${cyan(crimeChance + "%")}]` : green(sleeveInfo.activity);
+	let crimeChanceColor = Color.preset.red;
+	if(sleeveInfo.crime.chance > 0.25) crimeChanceColor = Color.preset.orange;
+	if(sleeveInfo.crime.chance > 0.50) crimeChanceColor = Color.preset.yellow;
+	if(sleeveInfo.crime.chance > 0.75) crimeChanceColor = Color.preset.lightGreen;
+	if(sleeveInfo.crime.chance === 1) crimeChanceColor = Color.preset.cyan;
 
-	// Sleeve #1  -  Sync: 98.245 | Shock: 0 | STR: 0001 | DEF: 0001 | DEX: 0001| AGI: 0001 | Activity: Synchronizing
-	return ` 🤖 ${sleeveID} \u001b[37m- 🔄 ${syncLevel} \u001b[37m| 💢 ${shockLevel} \u001b[37m| 🌐 ${hack} \u001b[37m| 💪 ${str} \u001b[37m| 🛡️ ${def} \u001b[37m| 🙌 ${dex} \u001b[37m| 🏃 ${agi} \u001b[37m| Activity: ${activity}`;
+
+	const g = Color.set("|", Color.preset.white);
+	const activity = (sleeveInfo.crime.isCrime) ? `${Color.set(sleeveInfo.activity, Color.preset.green)} ${Color.set("[", Color.preset.white)}${Color.set(crimeChance + "%", crimeChanceColor)}${Color.set("]", Color.preset.white)}` : Color.set(sleeveInfo.activity, Color.preset.green);
+
+	// Example output:
+	// 🤖 Sleeve-01 - 🔄 100.000% | ⚠️ 18.725% | 💻 ···3 | 💪 ··39 | 🛡️ ··39 | 🙌 ··41 | 🏃 ··41 | Activity: Homicide [20.80%]
+	return ` 🤖 ${sleeveID} ${syncLevel} ${g} ${shckLevel} ${g} ${hck} ${g} ${str} ${g} ${def} ${g} ${dex} ${g} ${agi} ${Color.set("| Activity:", Color.preset.white)} ${activity}`;
 }
 
 
@@ -82,6 +81,9 @@ function sleeveLog(sleeveInfo, numSleeves){
 export async function main(ns){
 	ns.disableLog("ALL");
 	ns.clearLog();
+
+	/** @type {Object<string, SleeveData>} */
+	const sleeves = {};
 
 	const CrimeType = ns.enums.CrimeType;
 	const CityName = ns.enums.CityName;
@@ -211,7 +213,7 @@ export async function main(ns){
 
 			let crimeToCommit = CrimeType.shoplift;
 			if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.mug) > 0.9) crimeToCommit = CrimeType.mug;
-			if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.homicide) > 0.25) crimeToCommit = CrimeType.homicide;
+			if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.homicide) > 0.15) crimeToCommit = CrimeType.homicide;
 			if(ns.gang.inGang()){
 				if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.grandTheftAuto) > 0.75) crimeToCommit = CrimeType.grandTheftAuto;
 				if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.assassination) > 0.80) crimeToCommit = CrimeType.assassination;
@@ -249,16 +251,11 @@ export async function main(ns){
 			sleeveInfo.push(logLine);
 		}
 
-		const sleeveExtraInfo = [
-			`${white(" Total Sleeves:")} ${cyan(totalSleeves)}`,
-			"\n"
-		];
 		ns.clearLog();
-		ns.print(sleeveExtraInfo.join("\n"));
 		ns.print(sleeveInfo.join("\n"));
 		ns.ui.setTailTitle(`\u200b Managing ${totalSleeves} sleeve${(totalSleeves > 1) ? "s" : ""}`);
 
-		ns.ui.resizeTail(1135, 77 + (22 * totalSleeves));
+		ns.ui.resizeTail(1135, 28 + (22 * totalSleeves));
 		ns.ui.setTailFontSize(14);
 
 		await ns.sleep(100);

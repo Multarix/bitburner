@@ -100,15 +100,6 @@ export async function main(ns){
 	}
 
 
-	if(ns.gang.inGang()){
-		const runGangManager = await ns.prompt("Start the Gang Manager?", { type: "boolean" });
-		if(runGangManager){
-			ns.exec("managers/gangManager.js", "home", { threads: 1, preventDuplicates: true });
-			ns.toast("Gang manager was started", "info");
-		}
-	}
-
-
 	if(ns.stock.hasWSEAccount() && ns.stock.hasTIXAPIAccess() && ns.stock.has4SDataTIXAPI()){
 		const runStockManager = await ns.prompt("Run Stockmarket Manager?", { type: "boolean" });
 		if(runStockManager){
@@ -117,10 +108,19 @@ export async function main(ns){
 		}
 	}
 
-	await ns.sleep(5000);
 	ns.exec("/managers/buyServer.js", "home", { threads: 1, preventDuplicates: true });
 	ns.exec("/managers/sleeveManager.js", "home", { threads: 1, preventDuplicates: true });
-	ns.exec("/managers/autoBuyer.js", "home", { threads: 1, preventDuplicates: true }); // Won't turn on if not enough RAM, as this uses singularity.
+	ns.exec("/managers/autoBuyer.js", "home", { threads: 1, preventDuplicates: true }); // Uses singularity.
+
+	if(ns.gang.inGang()){
+		ns.exec("managers/gangManager.js", "home", { threads: 1, preventDuplicates: true });
+		ns.toast("Gang manager was started", "info");
+	}
+
+	if(ns.sleeve.getNumSleeves() > 0){ // Kinda hefty to start, ~64GB RAM
+		ns.exec("managers/sleeveManager.js", "home", { threads: 1, preventDuplicates: true });
+		ns.toast("Sleeve manager was started", "info");
+	}
 
 	// This might fix an ongoing bug...
 	// ns.mv("home", "/managers/targetManager.jsx", "/managers/targetManager.js");

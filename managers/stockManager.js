@@ -1,12 +1,9 @@
-import * as ms from "/mystuff.js";
-
-const inHand = 0.11; // % of funds to keep in hand. Default 0.25
+const inHand = 0.25; // % of funds to keep in hand. Default 0.25
 const numCyclesToProject = 2; // Only buy stocks that are projected to increase for this amount of cycles. Recommended 2-5. Default 2
 const expectedRetentionLossToSell = -0.40; // Percent change between initial forecast and current forcast. ie if current forecast is 40% worse than initial, sell. Default -0.40
 const commission = 100000; // Current Buy/Sell Comission cost
 
-const SaveEarningsFile = "/save/stock.txt";
-const StopBuyingAndClose = "/stoptrade.txt";
+const ShouldSellPort = 11;
 
 /** @param {NS} ns */
 function pChange(ns, sym, oldNum, newNum){
@@ -51,13 +48,13 @@ function buy(ns, stock, numShares){
 	numShares = max < numShares ? max : numShares;
 
 	const total = ns.stock.buyStock(stock.sym, numShares) * numShares;
-	ns.print(`Bought ${stock.sym} for ${ms.fMoney(total + commission)}`);
+	ns.print(`Bought ${stock.sym} for $${ns.formatNumber(total + commission)}`);
 }
 
 /** @param {NS} ns */
 function sell(ns, stock, numShares){
 	const profit = ns.stock.sellStock(stock.sym, numShares) * numShares;
-	ns.print(`Sold ${stock.sym} for profit of ${ms.fMoney(profit - commission)}`);
+	ns.print(`Sold ${stock.sym} for profit of $${ns.formatNumber(profit - commission)}`);
 }
 
 /** @param {NS} ns */
@@ -65,7 +62,7 @@ export async function main(ns){
 	let sellOff = false;
 	let unexpectedExit = false;
 	ns.disableLog("ALL");
-	ns.tail();
+	ns.ui.openTail();
 
 	const stocks = [...ns.stock.getSymbols().map(_sym => {
 		return { sym: _sym };
@@ -77,16 +74,16 @@ export async function main(ns){
 
 		corpus = getStocks(ns, stocks, myStocks);
 		if(sellOff && myStocks.length < 1){
-			ns.rm(SaveEarningsFile); // clear this up now
-			ns.rm(StopBuyingAndClose);
 			unexpectedExit = true;
 			ns.tail();
-			ns.print("All stocks have been sold off, and the flag file has been removed. Final totals:");
-			ns.print(`Total Money  :${ms.fMoney(corpus)}`);
+			ns.print("All stocks have been sold off. Final totals:");
+			ns.print(`Total Money: $${ns.formatNumber(corpus)}`);
+			ns.alert(`All stocks have been sold off.\nFinal Totals $${ns.formatNumber(corpus)}`);
 			ns.exit();
 		}
 		// Symbol, Initial Return, Current Return, The % change between
 		// the Initial Return and the Current Return.
+		ns.clearLog();
 		ns.print("Currently Owned Stocks:");
 		ns.print(" SYM\t| InitReturn -> CurReturn | % change");
 
@@ -107,7 +104,7 @@ export async function main(ns){
 
 		ns.print(" SYM\t| $ invested\t| $ profit");
 		for(let i = 0; i < myStocks.length; i++){
-			ns.print(` ${myStocks[i].sym}:\t| ${ms.fMoney(myStocks[i].shares * myStocks[i].buyPrice)}\t| ${ms.fMoney((myStocks[i].shares * (myStocks[i].bidPrice - myStocks[i].buyPrice)) - (2 * commission))}`);
+			ns.print(` ${myStocks[i].sym}:\t| ${ns.formatNumber(myStocks[i].shares * myStocks[i].buyPrice)}\t| ${ns.formatNumber((myStocks[i].shares * (myStocks[i].bidPrice - myStocks[i].buyPrice)) - (2 * commission))}`);
 		}
 
 		ns.print("________________________________________");
@@ -115,7 +112,7 @@ export async function main(ns){
 		// Buy shares with cash remaining in hand
 
 		if(!sellOff){
-			if(ns.fileExists(StopBuyingAndClose)){
+			if(ns.peek(ShouldSellPort) === 1){
 				sellOff = true;
 				ns.tail();
 				continue;
@@ -135,7 +132,7 @@ export async function main(ns){
 		if(sellOff){
 			ns.print("Will stop buying and sell off stocks when profitable.");
 		}
-		ns.print(`Total Money  :${ms.fMoney(corpus)}`);
+		ns.print(`Total Money: $${ns.formatNumber(corpus)}`);
 
 		await updatePromise; // finish first wait, wait for any additional
 		for(let ii = 1; ii < numCyclesToProject; ++ii){

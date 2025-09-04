@@ -1,4 +1,4 @@
-import { green, getMaxPorts, numberConvert, scanNetworks } from "helpers/Functions";
+import { green, getMaxPorts, numberConvert, scanNetworks, Color, progressBar, FiraCodeLoading } from "helpers/Functions";
 
 /** @param {NS} ns **/
 function deploy(ns){
@@ -154,6 +154,19 @@ export async function main(ns){
 	if(argument === "xp") xp(ns);
 	if(argument === "scan") ns.print(scanNetworks(ns, "home", true));
 	if(argument === "crime") crimes(ns);
+
+	if(argument === "stock"){
+		ns.ui.closeTail();
+		const isSelling = (ns.peek(11) === 1);
+
+		ns.clearPort(11);
+		ns.writePort(11, Number(!isSelling));
+
+		const action = isSelling ? "BUY" : "SELL";
+		const textColor = isSelling ? Color.preset.red : Color.preset.green;
+		ns.tprint(`${Color.set("Setting stock manager to", Color.preset.yellow)} ${Color.set(action, textColor)}`);
+	}
+
 	if(argument === "player"){
 		const player = ns.getPlayer();
 		const killed = player.numPeopleKilled;
@@ -163,6 +176,26 @@ export async function main(ns){
 		ns.tprint(`Killed: ${killed} | Karma: ${karma} | Entropy: ${entropy}`);
 		ns.ui.closeTail();
 	}
-	// ns.alert("Recommended Actions:\n- Purchase TOR Router\n- Set to 'Rob Store'");
-	// ns.print(ns.peek(20));
+
+	ns.clearLog();
+	const bar1 = progressBar(0.1, FiraCodeLoading.filled, FiraCodeLoading.empty) + " 0.1";
+	const bar2 = progressBar(0.2, FiraCodeLoading.filled, FiraCodeLoading.empty) + " 0.2";
+	const bar3 = progressBar(0.3, FiraCodeLoading.filled, FiraCodeLoading.empty) + " 0.3";
+	const bar4 = progressBar(0.4, FiraCodeLoading.filled, FiraCodeLoading.empty) + " 0.4";
+	const bar5 = progressBar(0.5, FiraCodeLoading.filled, FiraCodeLoading.empty) + " 0.5";
+	const bar6 = progressBar(0.6, FiraCodeLoading.filled, FiraCodeLoading.empty) + " 0.6";
+	const bar7 = progressBar(0.7, FiraCodeLoading.filled, FiraCodeLoading.empty) + " 0.7";
+	const bar8 = progressBar(0.8, FiraCodeLoading.filled, FiraCodeLoading.empty) + " 0.8";
+	const bar9 = progressBar(0.9, FiraCodeLoading.filled, FiraCodeLoading.empty) + " 0.9";
+	const bar10 = progressBar(1, FiraCodeLoading.filled, FiraCodeLoading.empty) + " 1";
+	ns.print(bar1);
+	ns.print(bar2);
+	ns.print(bar3);
+	ns.print(bar4);
+	ns.print(bar5);
+	ns.print(bar6);
+	ns.print(bar7);
+	ns.print(bar8);
+	ns.print(bar9);
+	ns.print(bar10);
 }

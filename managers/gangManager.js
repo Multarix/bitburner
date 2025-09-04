@@ -1,66 +1,200 @@
-import { numberConvert as FormatNumber } from "/helpers/Functions.js";
-import { TextTransforms } from "/helpers/text-transform.js";
+import { Color, progressBar, FiraCodeLoading } from "helpers/Functions";
+
+// Variables, change at will
+const buyingWeapons = false;
+const buyingArmor = false;
+const buyingVehicles = false;
+const buyingRootkits = false;
+const buyingAugmentations = true;
+const RESPECT_BEFORE_MONEY = 1000000;
+
+// Constants, don't change
+const HackAugs = ["DataJack", "Neuralstimulator", "BitWire"];
+const Rootkits = ["NUKE Rootkit", "Soulstealer Rootkit", "Demon Rootkit", "Hmap Node", "Jack the Ripper"];
+const CrimeAugs = ["Bionic Spine", "Bionic Arms", "Bionic Legs", "Graphene Bone Lacings", "Synthetic Heart", "BrachiBlades", "Nanofiber Weave", "Synfibril Muscle"];
+const Weapons = ["Baseball Bat", "Katana", "Glock 18C", "P90C", "Steyr AUG", "AK-47", "M15A10 Assault Rifle", "AWM Sniper Rifle"];
+const Armor = ["Liquid Body Armor", "Bulletproof Vest", "Full Body Armor", "Graphene Plating Armor"];
+const Vehicles = ["Ford Flex V20", "White Ferrari", "ATX1070 Superbike", "Mercedes-Benz S9001"];
+
+// https://www.fantasynamegenerators.com/
+const HackerNames = ["B00TSTR4P", "PR0T0C4LL", "CR4CK3D", "INST4LL3R", "SP1D3R", "L3G4CY", "GH0ST", "BYT3BURN3R", "ALG0R1THM", "D3BUG", "B1TCL0UD", "T3RM1N4L"];
+const CriminalNames = ["Fang", "Dawn", "Storm", "Crusher", "Red", "Bone", "Claw", "Beak", "Doom", "Talon", "Ryder", "Mantle"];
+
+const memberPrepped = [];
+const membersAscended = [];
+const memberStats = [];
+
+const warfare = "Territory Warfare"; // Territory Warfare
+const idle = "Unassigned"; // Unassigned
+
+// Variable Constants, these get changed at runtime
+let isHacking = true;
+let topEarner = ""; // Best Money
+let topRespect = ""; // Best Respect
+let topVirtuous = ""; // Best wanted removal
+let trainStat = "";
+
+
+
+function getAscendThreshold(mult){
+	if(mult < 1.632) return 1.6326;
+	if(mult < 2.336) return 1.4315;
+	if(mult < 2.999) return 1.284;
+	if(mult < 3.363) return 1.2125;
+	if(mult < 4.253) return 1.1698;
+	if(mult < 4.860) return 1.1428;
+	if(mult < 5.455) return 1.1225;
+	if(mult < 5.977) return 1.0957;
+	if(mult < 6.496) return 1.0869;
+	if(mult < 7.008) return 1.0789;
+	if(mult < 7.519) return 1.073;
+	if(mult < 8.025) return 1.0673;
+	if(mult < 8.513) return 1.0631;
+	return 1.0591;
+}
+
+
+
+// Recruit a new prospect to a full gang member.
+/** @param {NS} ns */
+async function recruitMember(ns, MemberNames){
+	const currentMembers = ns.gang.getMemberNames();
+	const availableNames = MemberNames.filter(x => !currentMembers.includes(x));
+	ns.gang.recruitMember(availableNames[0]);
+	ns.gang.setMemberTask(availableNames[0], trainStat); // Set to train initially.
+	await ns.sleep(50);
+}
+
+
+
+// Attempt to assign Gang Member specified tasks
+/** @param {NS} ns */
+function assignJob(ns, member, skillLevel){
+	const memberInfo = ns.gang.getMemberInformation(member);
+	const gangInfo = ns.gang.getGangInformation();
+
+	const wantedLevel = memberInfo.wantedLevelGain;
+	const earnedRespect = memberInfo.earnedRespect;
+
+	// GET STATS
+	memberStats.push(member + "|" + wantedLevel);
+	memberStats.push(member + "|" + earnedRespect);
+
+	// Skill Training
+	if(skillLevel < 500 && earnedRespect < 500){
+		ns.gang.setMemberTask(member, trainStat);
+		return memberStats.push(member + "|" + trainStat);
+	}
+
+	let task = topRespect; // Generate Respect by default
+	if(earnedRespect > RESPECT_BEFORE_MONEY) task = topEarner; // Make Money
+
+	if(wantedLevel >= 100) task = topVirtuous; // Vigilante Justice
+	if(!isHacking){
+		if(gangInfo.territory < 1 && ns.gang.getMemberNames().length === 12){
+			if(earnedRespect > RESPECT_BEFORE_MONEY || gangInfo.territoryWarfareEngaged) task = warfare; // Increase Power
+		}
+	}
+
+	// Assign task and we're gucci
+	ns.gang.setMemberTask(member, task);
+	return memberStats.push(member + "|" + task);
+}
+
 
 /** @param {NS} ns */
-export async function main(ns){
-	/*
-    General gang action plan:
-        Gain Respect
-            -> 12 members
-                -> power
-                    -> all win chances > 55%
-                        -> if engage in territory warfare is on
-                            -> power/money (keep win chances > 55%)
-                                -> territory 100%
-                                    -> gain money/rep
-    ---------------------------------------------------------------
-	*/
+function prepareMember(ns, name){
+	if(isHacking){ // If we're a hacking gang, we only care about hacking augments and rootkits
+		const memberInformation = ns.gang.getMemberInformation(name);
+		if(buyingAugmentations){ // Augments
+			for(const item of HackAugs){
+				if(memberInformation.augmentations.includes(item)) continue;
+				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
+			}
+		}
 
+		if(buyingRootkits){ // Rootkits
+			for(const item of Rootkits){
+				if(memberInformation.upgrades.includes(item)) continue;
+				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
+			}
+		}
+	}
+
+
+	if(!isHacking){ // If we're not a hacking gang, we have a bunch of other stuff we might care about.
+		const memberInformation = ns.gang.getMemberInformation(name);
+		if(buyingAugmentations){ // Augments
+			for(const item of CrimeAugs){
+				if(memberInformation.augmentations.includes(item)) continue;
+				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
+			}
+		}
+
+		if(buyingWeapons){ // Weapons
+			for(const item of Weapons){
+				if(memberInformation.upgrades.includes(item)) continue;
+				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
+			}
+		}
+
+		if(buyingArmor){ // Armor
+			for(const item of Armor){
+				if(memberInformation.upgrades.includes(item)) continue;
+				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
+			}
+		}
+
+		if(buyingVehicles){ // Vehicles
+			for(const item of Vehicles){
+				if(memberInformation.upgrades.includes(item)) continue;
+				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
+			}
+		}
+	}
+
+	let maxPrepCount = 0;
+	if(buyingWeapons) maxPrepCount += Weapons.length;
+	if(buyingArmor) maxPrepCount += buyingArmor.length;
+	if(buyingArmor) maxPrepCount += Vehicles.length;
+	if(buyingAugmentations && !isHacking) maxPrepCount += CrimeAugs.length;
+	if(buyingAugmentations && isHacking) maxPrepCount += HackAugs.length;
+	if(buyingRootkits && isHacking) maxPrepCount += Rootkits.length;
+
+	const memberInformation = ns.gang.getMemberInformation(name);
+	if(memberInformation.augmentations.length + memberInformation.upgrades.length >= maxPrepCount) memberPrepped.push(name);
+}
+
+
+
+/**
+General gang action plan:
+	Gain Respect
+		-> 12 members
+			-> power
+				-> all win chances > 55%
+				-> if engage in territory warfare is on
+					-> power/money (keep win chances > 55%)
+						-> territory 100%
+							-> gain money/rep
+---------------------------------------------------------------
+* @param {NS} ns */
+export async function main(ns){
 	ns.disableLog("ALL");
 	ns.clearLog();
 	ns.ui.openTail();
-	ns.ui.setTailTitle("Gang Manager");
+	ns.ui.setTailTitle("\u200b Gang Manager");
 
 	if(!ns.gang.inGang()) throw "You are not currently in a gang!";
-	const isHacking = ns.gang.getGangInformation().isHacking;
+	isHacking = ns.gang.getGangInformation().isHacking;
 
-	const buyingWeapons = false;
-	const buyingArmor = false;
-	const buyingVehicles = false;
-	const buyingRootkits = true;
-	const buyingAugmentations = true;
-	const RESPECT_BEFORE_MONEY = 100000000;
 	let maxRespect = 0;
 
-	const memberPrepped = [];
-	const membersAscended = [];
-	const memberStats = [];
-
-	const delay = 100;
-
-	const HackAugs = ["DataJack", "Neuralstimulator", "BitWire"];
-	const Rootkits = ["NUKE Rootkit", "Soulstealer Rootkit", "Demon Rootkit", "Hmap Node", "Jack the Ripper"];
-	const CrimeAugs = ["Bionic Spine", "Bionic Arms", "Bionic Legs", "Graphene Bone Lacings", "Synthetic Heart", "BrachiBlades", "Nanofiber Weave", "Synfibril Muscle"];
-	const Weapons = ["Baseball Bat", "Katana", "Glock 18C", "P90C", "Steyr AUG", "AK-47", "M15A10 Assault Rifle", "AWM Sniper Rifle"];
-	const Armor = ["Liquid Body Armor", "Bulletproof Vest", "Full Body Armor", "Graphene Plating Armor"];
-	const Vehicles = ["Ford Flex V20", "White Ferrari", "ATX1070 Superbike", "Mercedes-Benz S9001"];
-
-	const HackerNames = ["B00TSTR4P", "PR0T0C4LL", "CR4CK3D", "INST4LL3R", "SP1D3R", "L3G4CY", "GH0ST", "BYT3BURN3R", "ALG0R1THM", "D3BUG", "B1TCL0UD", "T3RM1N4L"];
-	const CriminalNames = ["Nightfang", "Dawnwing", "Stormblood", "Fireheart", "Redflayer", "Boneblade", "Bloodclaw", "Brighthair", "Doomthorn", "Wildsorrow", "Ryder", "Mantle"];
-	const MemberNames = isHacking ? HackerNames : CriminalNames;
-
-	/*
-        https://www.fantasynamegenerators.com/cyberpunk-names.php
-    */
-
-	const topEarner = isHacking ? "Money Laundering" : "Unknown Money"; // Get Money
-	const topRespect = isHacking ? "Cyberterrorism" : "Terrorism"; // Get Respect
-	const topVirtuous = "Vigilante Justice";
-	const trainStat = isHacking ? "Train Hacking" : "Train Combat";
-
-	const warfare = "Territory Warfare"; // Territory Warfare
-	const idle = "Unassigned"; // Unassigned
-
+	const MemberNames = (isHacking) ? HackerNames : CriminalNames;
+	topEarner = (isHacking) ? "Money Laundering" : "Human Trafficking"; // Get Money
+	topRespect = (isHacking) ? "Cyberterrorism" : "Terrorism"; // Get Respect
+	trainStat = (isHacking) ? "Train Hacking" : "Train Combat";
+	topVirtuous = "Vigilante Justice";
 
 	// Engine
 	while(true){
@@ -74,52 +208,76 @@ export async function main(ns){
 		const gangRespect = ns.formatNumber(ns.gang.getGangInformation().respect);
 		const nextRecruit = ns.formatNumber(ns.gang.respectForNextRecruit());
 
-		ns.print(` 🌆 Gang: ${TextTransforms.apply(gangInfo.faction, [TextTransforms.Color.Orange])} ${isHacking ? "💻" : "⚔️"}`);
-		ns.print(" 🏦 Money Available: " + TextTransforms.apply("$" + ns.formatNumber(money), [TextTransforms.Color.LGreen]));
-		ns.print(" 💵 Gang Income/sec: " + TextTransforms.apply("$" + ns.formatNumber(gangIncome), [TextTransforms.Color.LGreen]));
-		ns.print(" 🦾 Gang Respect: " + TextTransforms.apply(gangRespect, [TextTransforms.Color.LPurple]));
-		if(ns.gang.getMemberNames().length < 12) ns.print(" 🙍 Next Recruit: " + TextTransforms.apply(nextRecruit, [TextTransforms.Color.Red]));
+		const otherGangs = ns.gang.getOtherGangInformation();
 
 		const members = ns.gang.getMemberNames();
 		const prospects = MemberNames.filter(c => !members.includes(c));
 
-		// FULL MEMBERS
+		let lowestChance = 1;
+		for(const gang in otherGangs){
+			if(gang === gangInfo.faction) continue; // This is us
+			lowestChance = Math.min(ns.gang.getChanceToWinClash(gang), lowestChance);
+		}
+
+		ns.gang.setTerritoryWarfare((gangInfo.territory < 1 && lowestChance > 0.6));
+
+
+		ns.print(` 🌆 Gang:            ${Color.set(gangInfo.faction, Color.preset.orange)} ${isHacking ? "💻" : "⚔️"}`);
+		ns.print(" 🏦 Money Available: " + Color.set(`$${ns.formatNumber(money)}`, Color.preset.lime));
+		ns.print(" 💵 Gang Income/sec: " + Color.set(`$${ns.formatNumber(gangIncome)}`, Color.preset.lime));
+		ns.print(" 🦾 Gang Respect:    " + Color.set(gangRespect, Color.preset.lightPurple));
+		if(members.length < 12) ns.print(" 👤 Next Recruit:    " + Color.set(nextRecruit, Color.preset.red));
+		if(members.length === 12 && !isHacking){
+			ns.print(" ⚡️ Gang Power:      " + Color.set(ns.formatNumber(gangInfo.power), Color.preset.yellow));
+
+			let territoryPercentColor = Color.preset.red;
+			if(gangInfo.territory > 0.25) territoryPercentColor = Color.preset.orange;
+			if(gangInfo.territory > 0.50) territoryPercentColor = Color.preset.yellow;
+			if(gangInfo.territory > 0.75) territoryPercentColor = Color.preset.lightGreen;
+			if(gangInfo.territory === 1) territoryPercentColor = Color.preset.cyan;
+
+			const territoryBar = Color.set(progressBar(gangInfo.territory, FiraCodeLoading.filled, FiraCodeLoading.empty), Color.preset.white);
+			const territoryPercent = Color.set(ns.formatPercent(gangInfo.territory), territoryPercentColor);
+			ns.print(` 🚩 Territory:       ${territoryBar} ${territoryPercent}`);
+		}
+
+
+		// Full Member
 		ns.print("\n" + " 😈 Current Members:" + "\n");
 		const activeteam = members.join(", ");
-		ns.print("    " + TextTransforms.apply(activeteam, [TextTransforms.Color.ChartsBlue]) + "\n");
+		ns.print("    " + Color.set(activeteam, Color.preset.lightBlue) + "\n");
 
-		// PROSPECTS
-		ns.print("\n" + " 😐 Prospects:" + "\n");
-		let waitteam = ""; // reset
-		waitteam = prospects.join(", ");
+		// Prospects
+		if(ns.gang.getMemberNames().length < 12){
+			ns.print("\n" + " 😐 Prospects:" + "\n");
+			let waitteam = ""; // reset
+			waitteam = prospects.join(", ");
 
-		let msg = "    " + TextTransforms.apply(waitteam, [TextTransforms.Color.LPurple]) + "\n";
-		if(waitteam.length === 0) msg = "    Gang has been maxed out.\n";
-		ns.print(msg);
+			const msg = "    " + Color.set(waitteam, Color.preset.lightOrange) + "\n";
+			ns.print(msg);
+		}
 
 		if(gangInfo.respect > maxRespect) maxRespect = gangInfo.respect;
-		const minRespect = maxRespect * 0.5;
+		// const minRespect = maxRespect * 0.75;s
 
-
-		// RECRUIT
 		if(ns.gang.canRecruitMember()){
 			ns.print("\n" + " Recruiting new prospect..." + "\n");
-			await RecruitProspect();
+			await recruitMember(ns, MemberNames);
 		}
 
 		// Sort members from highest to lowest respect gained.
-		const skillSort = members.sort((b, a) => ns.gang.getMemberInformation(a).earnedRespect - ns.gang.getMemberInformation(b).earnedRespect);
+		const memberSort = members.sort((b, a) => ns.gang.getMemberInformation(a).earnedRespect - ns.gang.getMemberInformation(b).earnedRespect);
 
 		// SHOW STATS
-		ns.print("\n" + " ✨ Members sorted by Hack Skill Level:");
-		for(let i = 0; i < skillSort.length; ++i){
-			const level = isHacking ? ns.gang.getMemberInformation(skillSort[i]).hack : ns.gang.getMemberInformation(skillSort[i]).str;
+		ns.print("\n");
+		ns.print(" 👥 Members, sorted by highest respect:");
+		for(let i = 0; i < memberSort.length; i++){
+			const level = isHacking ? ns.gang.getMemberInformation(memberSort[i]).hack : ns.gang.getMemberInformation(memberSort[i]).str;
 
-			// ns.print("   " + "💻 " + skillSort[i] + ", Hack skill level: " + level + "");
-			memberStats.push(skillSort[i] + "|" + level);
+			memberStats.push(memberSort[i] + "|" + level);
 
-			// ASSIGN JOBS
-			GiveAssignments(skillSort[i], level);
+			// Give Assignment
+			assignJob(ns, memberSort[i], level);
 		}
 
 		// MEMBER STATS
@@ -131,6 +289,13 @@ export async function main(ns){
 		let longest2 = 0;
 		let longest3 = 0;
 		let longest4 = 0;
+		let longest5 = 0;
+
+		for(const member of members){
+			const mem = ns.gang.getMemberInformation(member);
+			const wanted = mem.wantedLevelGain.toFixed(4);
+			longest5 = Math.max(wanted.length, longest5);
+		}
 
 		// Loop through each record in _memberStats array
 		for(let i = 0; i < memberStats.length; i++){
@@ -183,75 +348,91 @@ export async function main(ns){
 			const task = splitStr[4];
 
 			const num0 = parseFloat(wantedlevel).toFixed(4);
-			const num1 = parseFloat(respect).toFixed(2);
+			const num1 = (parseInt(respect) >= 1000) ? ns.formatNumber(parseInt(respect), 3, 1000) : parseInt(respect).toFixed(0);
 
-			ns.print(TextTransforms.apply(name.padStart(longest0 + 1), [TextTransforms.Color.ChartsBlue])
-                + ", 💻hack: " + TextTransforms.apply(hacklevel.padStart(longest1 + 1), [TextTransforms.Color.ChartsGreen])
-                + ", 🕶️wanted: " + TextTransforms.apply(num0.padStart(9), [TextTransforms.Color.ChartsGreen])
-                + ", 🦾respect: " + TextTransforms.apply(num1.padStart(9), [TextTransforms.Color.ChartsGreen])
-                + ", 💵task: " + TextTransforms.apply(task.padStart(longest4 + 1), [TextTransforms.Color.ChartsGreen])
+			const hackOrStrength = (isHacking) ? ": 💻 Hack: " : ": 💪 STR: ";
+
+			ns.print(Color.set(name.padStart(longest0 + 1, " "), Color.preset.lightBlue)
+                + hackOrStrength + Color.set(hacklevel.padStart(longest1, " "), Color.preset.lightYellow)
+                + ", 👮 Wanted: " + Color.set(num0.padStart(longest5, " "), Color.preset.lightYellow)
+                + ", 🦾 Respect: " + Color.set(num1.padStart(8, " "), Color.preset.lightYellow)
+                + ", 💼 Task: " + Color.set(task.padEnd(longest4 + 1, " "), Color.preset.lightGreen)
                 + " \n");
 		});
 
 		// ASCEND & PREP
 		let longest = 0;
+		let highestMult = 0;
 
 		for(const member of members){
 			longest = Math.max(member.length, longest);
+
+			const memberInfo = ns.gang.getMemberInformation(member);
+			const memberMult = (isHacking) ? memberInfo.hack_asc_mult : memberInfo.str_asc_mult;
+			highestMult = Math.max(memberMult, highestMult);
 		};
 
-		ns.print("\n" + " ⬆ Ascension✨ & Prep🔪💣🛡️ stats: " + "\n");
+		const multLength = Math.round(highestMult).toString().length;
 
-		const lbracket = TextTransforms.apply("[", [TextTransforms.Color.ChartsGray]);
-		const rbracket = TextTransforms.apply("]", [TextTransforms.Color.ChartsGray]);
+		ns.print("\n");
+		ns.print(" 👑 Ascension, sorted by highest multiplier");
+
+		const lbracket = Color.set("[", Color.preset.lightGray);
+		const rbracket = Color.set("]", Color.preset.lightGray);
+
+		members.sort((a, b) => {
+			const aInfo = ns.gang.getMemberInformation(a);
+			const bInfo = ns.gang.getMemberInformation(b);
+
+			const aMult = (isHacking) ? aInfo.hack_asc_mult : aInfo.str_asc_mult;
+			const bMult = (isHacking) ? bInfo.hack_asc_mult : bInfo.str_asc_mult;
+
+			return bMult - aMult;
+		});
 
 		for(const mem of members){
 
-			let prepping = "";
-			let output = "";
-			const member_name = "" + TextTransforms.apply(mem.padStart(longest + 1), [TextTransforms.Color.ChartsBlue]) + "";
-			const numTimesAscended = NumberOfTimesAscended(membersAscended, mem);
+			let prepping = `${lbracket}${Color.set(" Prepared ", Color.preset.green)}${rbracket}`;
+			const member_name = Color.set(mem.padStart(longest + 1, " "), Color.preset.lightBlue) ;
 
-			// PREP
-			if(memberPrepped.includes(mem.trim())){
-				// ALREADY PREPPED OUT
-				prepping = " " + lbracket + TextTransforms.apply("Fully Prepped 🔪💣🛡️", [TextTransforms.Color.ChartsGreen]) + rbracket + "";
-			} else {
-				// PREP MEMBER
-				prepping = " " + lbracket + TextTransforms.apply("✨Prepping✨", [TextTransforms.Color.ChartsGray]) + rbracket + "";
-				Prepare(mem);
+			// Member Prepping
+			if(!memberPrepped.includes(mem.trim())){
+				prepping = `${lbracket}${Color.set(" Prepping ", Color.preset.gray)}${rbracket}`;
+				prepareMember(ns, mem);
 			}
 
-			// ASCEND
-			try {
+			try { // Member Ascension
 				const memberInfo = ns.gang.getMemberInformation(mem); // Get entire gang member object from name.
 				const ascResult = ns.gang.getAscensionResult(mem); // Get the result of an ascension without ascending.
 
 				if(ascResult != undefined){
-					const next_point_exp = memberInfo.hack_exp;
+					const next_point_exp = (isHacking) ? memberInfo.hack_exp : memberInfo.str_exp;
 					const next_Point = Math.max(next_point_exp - 1000, 0); // Stolen from game source code, who need Formulas.exe anyway?
-					// const next_Point = ns.formulas.gang.ascensionPointsGain(memberInfo.hack_exp);
+					// const next_Point = ns.formulas.gang.ascensionPointsGain(next_point_exp);
 
-					const next_Mult_exp = memberInfo.hack_asc_points + next_Point;
+					const asc_points = (isHacking) ? memberInfo.hack_asc_points : memberInfo.str_asc_points;
+					const next_Mult_exp = asc_points + next_Point;
 					const next_Mult = Math.max(Math.pow(next_Mult_exp / 2000, 0.5), 1); // Stolen from game source code, who need Formulas.exe anyway?
-					// const next_Mult = ns.formulas.gang.ascensionMultiplier(memberInfo.hack_asc_points + next_Point);
+					// const next_Mult = ns.formulas.gang.ascensionMultiplier(next_Mult_exp);
 
-					const current_Mult = memberInfo.hack_asc_mult;
+					const current_Mult = (isHacking) ? memberInfo.hack_asc_mult : memberInfo.str_asc_mult;
 
 					const nxtmutlp_div_by_currentmultp = (next_Mult / current_Mult);
-					const calculated_asc_threshold = CalculateAscendTreshold(current_Mult);
+					const calculated_asc_threshold = getAscendThreshold(current_Mult);
 
-					let doAsc = false;
-
-					output = "times_asc: " + numTimesAscended + " " + lbracket + TextTransforms.apply("Working", [TextTransforms.Color.ChartsGray]) + rbracket + " " + nxtmutlp_div_by_currentmultp.toFixed(5) + " < " + calculated_asc_threshold.toFixed(4) + " (" + TextTransforms.apply("nxt_mltp: ", [TextTransforms.Color.ChartsGray]) + ns.formatNumber(next_Mult, "0.000a") + ")";
-					if((next_Mult / current_Mult) >= CalculateAscendTreshold(current_Mult)){
-						// Give message to ascend.
-						output = "times_asc: " + numTimesAscended + " " + lbracket + TextTransforms.apply("✨Ascending✨", [TextTransforms.Color.ChartsGreen]) + rbracket + " " + nxtmutlp_div_by_currentmultp.toFixed(5) + " >= " + calculated_asc_threshold.toFixed(4) + " (" + TextTransforms.apply("nxt_mltp: ", [TextTransforms.Color.ChartsGray]) + ns.formatNumber(next_Mult, "0.000a") + ")";
-						doAsc = true;
-					}
+					const doAsc = nxtmutlp_div_by_currentmultp >= calculated_asc_threshold;
 
 
-					ns.print(member_name + ", " + output + " " + prepping + " \n");
+					const readyText = doAsc ? Color.set("   Ready   ", Color.preset.lime) : Color.set(" Not Ready ", Color.preset.gray);
+					const curMultColor = doAsc ? Color.preset.green : Color.preset.green;
+					const curMult = Color.set(nxtmutlp_div_by_currentmultp.toFixed(5), curMultColor);
+					const symbol = doAsc ? "≥" : "<";
+					const ascThreshold = Color.set(calculated_asc_threshold.toFixed(4), Color.preset.lightPurple);
+					const multiplier = `\u0078${ns.formatNumber(current_Mult, 0, 1000000)}`.padStart(multLength + 1);
+					const multi = `(${Color.set(multiplier, Color.preset.lightYellow)})`;
+
+					const output = `${member_name}:  ${curMult} ${symbol} ${ascThreshold} ${multi}  -  ${lbracket}${readyText}${rbracket} ${prepping}`;
+					ns.print(output);
 
 					/*
                         ASCEND
@@ -262,15 +443,18 @@ export async function main(ns){
                     */
 					if(doAsc){
 						await ns.sleep(50);
-						// As long as ascending doesn't drop us below 50% of our max respect we've ever achieved, ascend
-						if(gangInfo.respect - memberInfo.earnedRespect > minRespect){
-							Ascend(mem); // ascend the member
-							membersAscended.push(mem); // let this grow.
-						}
+						ns.gang.ascendMember(mem);
+						membersAscended.push(mem);
+
+						// As long as ascending doesn't drop us below x% of our max respect we've ever achieved, ascend
+						// if(gangInfo.respect - memberInfo.earnedRespect > minRespect){
+						// 	ns.gang.ascendMember(mem);
+						// 	membersAscended.push(mem);
+						// }
 					}
 				}
-			} catch {
-				// ignore.
+			} catch (e){
+				console.log(e);
 			}
 		}
 
@@ -279,139 +463,6 @@ export async function main(ns){
 		memberStats.length = 0;
 
 		ns.print(" \n");
-		await ns.sleep(delay);
-	}
-
-	// Credit: Mysteyes. https://discord.com/channels/415207508303544321/415207923506216971/940379724214075442
-	function CalculateAscendTreshold(mult){
-		if(mult < 1.632) return 1.6326;
-		if(mult < 2.336) return 1.4315;
-		if(mult < 2.999) return 1.284;
-		if(mult < 3.363) return 1.2125;
-		if(mult < 4.253) return 1.1698;
-		if(mult < 4.860) return 1.1428;
-		if(mult < 5.455) return 1.1225;
-		if(mult < 5.977) return 1.0957;
-		if(mult < 6.496) return 1.0869;
-		if(mult < 7.008) return 1.0789;
-		if(mult < 7.519) return 1.073;
-		if(mult < 8.025) return 1.0673;
-		if(mult < 8.513) return 1.0631;
-		return 1.0591;
-	}
-
-	function NumberOfTimesAscended(membersAscended, name){
-		let timesAscended = 0;
-		for(let i = 0; i < membersAscended.length; i++){
-			if(membersAscended[i] == name){
-				timesAscended += 1;
-			}
-		}
-		return timesAscended;
-	}
-
-	// Recruit a new prospect to a full gang member.
-	async function RecruitProspect(){
-		const currentMembers = ns.gang.getMemberNames();
-		const availableNames = MemberNames.filter(x => !currentMembers.includes(x));
-		ns.gang.recruitMember(availableNames[0]);
-		ns.gang.setMemberTask(availableNames[0], "Train Hacking"); // Set to train initially.
-		await ns.sleep(50);
-	}
-
-	// Ascend this current gang member
-	function Ascend(name){
-		return ns.gang.ascendMember(name); // Ascend the specified Gang Member.
-	}
-
-	function Prepare(name){
-		if(isHacking){ // If we're a hacking gang, we only care about hacking augments and rootkits
-			const memberInformation = ns.gang.getMemberInformation(name);
-			if(buyingAugmentations){ // Augments
-				for(const item of HackAugs){
-					if(memberInformation.augmentations.includes(item)) continue;
-					if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
-				}
-			}
-
-			if(buyingRootkits){ // Rootkits
-				for(const item of Rootkits){
-					if(memberInformation.upgrades.includes(item)) continue;
-					if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
-				}
-			}
-		}
-
-
-		if(!isHacking){ // If we're not a hacking gang, we have a bunch of other stuff we might care about.
-			const memberInformation = ns.gang.getMemberInformation(name);
-			if(buyingAugmentations){ // Augments
-				for(const item of CrimeAugs){
-					if(memberInformation.augmentations.includes(item)) continue;
-					if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
-				}
-			}
-
-			if(buyingWeapons){ // Weapons
-				for(const item of Weapons){
-					if(memberInformation.upgrades.includes(item)) continue;
-					if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
-				}
-			}
-
-			if(buyingArmor){ // Armor
-				for(const item of Armor){
-					if(memberInformation.upgrades.includes(item)) continue;
-					if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
-				}
-			}
-
-			if(buyingVehicles){ // Vehicles
-				for(const item of Vehicles){
-					if(memberInformation.upgrades.includes(item)) continue;
-					if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
-				}
-			}
-		}
-
-		let maxPrepCount = 0;
-		if(buyingWeapons) maxPrepCount += Weapons.length;
-		if(buyingArmor) maxPrepCount += buyingArmor.length;
-		if(buyingArmor) maxPrepCount += Vehicles.length;
-		if(buyingAugmentations && !isHacking) maxPrepCount += CrimeAugs.length;
-		if(buyingAugmentations && isHacking) maxPrepCount += HackAugs.length;
-		if(buyingRootkits && isHacking) maxPrepCount += Rootkits.length;
-
-		const memberInformation = ns.gang.getMemberInformation(name);
-		if(memberInformation.augmentations.length + memberInformation.upgrades.length >= maxPrepCount) memberPrepped.push(name);
-	}
-
-	// Attempt to assign Gang Member specified tasks
-	function GiveAssignments(member, skillLevel){
-		const memberInfo = ns.gang.getMemberInformation(member);
-
-		const wantedLevel = memberInfo.wantedLevelGain;
-		const earnedRespect = memberInfo.earnedRespect;
-
-		// GET STATS
-		memberStats.push(member + "|" + wantedLevel);
-		memberStats.push(member + "|" + earnedRespect);
-
-
-		let task = topRespect; // Generate Respect by default
-		if(earnedRespect > RESPECT_BEFORE_MONEY) task = topEarner; // Make Money
-
-		// Skill Training
-		if(skillLevel < 400 && earnedRespect < 500){
-			ns.gang.setMemberTask(member, trainStat);
-			return memberStats.push(member + "|" + trainStat);
-		}
-
-		// Cops are comin' for us boss, lets do some good ye?
-		if(wantedLevel >= 100) task = topVirtuous; // Vigilante Justice
-
-		// Assign task and we're gucci
-		ns.gang.setMemberTask(member, task);
-		return memberStats.push(member + "|" + task);
+		await ns.gang.nextUpdate();
 	}
 }
