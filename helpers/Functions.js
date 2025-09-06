@@ -78,7 +78,7 @@ export function progressBar(progress, filled = "#", empty = " "){
 	/** @type {string} */
 	const emptyEnd = empty.endOverride || emptyString;
 
-	const multTen = Math.round(progress * 10);
+	const multTen = Math.floor(progress * 10);
 
 	let progressBarStr = (multTen >= 1) ? filledStart : emptyStart;
 	progressBarStr = progressBarStr.padEnd(multTen, filledString).padEnd(10, emptyString);

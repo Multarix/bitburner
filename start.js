@@ -68,11 +68,11 @@ export async function main(ns){
 		await ns.sleep(500);
 
 		const waitTime = ns.getWeakenTime("foodnstuff");
-		const maxThreads = Math.floor((homeRAM - 8) / ns.getScriptRam("/scripts/single/weaken.js"));
+		const maxThreads = Math.floor((homeRAM - 16) / ns.getScriptRam("/scripts/single/weaken.js"));
 		ns.run("/scripts/single/weaken.js", maxThreads, "foodnstuff");
 		ns.print(`Doing mass weaken for exp | ETA: ${white(timeConvert(waitTime + 2000))}`);
 
-		await ns.sleep(waitTime + 2000);
+		await ns.sleep(waitTime + 5000);
 	}
 
 

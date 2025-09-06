@@ -1,4 +1,4 @@
-import { Color, cyan, white } from "helpers/Functions";
+import { Color } from "helpers/Functions";
 
 const IGNORE_SYNC_SHOCK = true; // Toggle this if sleeves should ignore trying to recover or sync
 
@@ -64,16 +64,16 @@ function sleeveLog(sleeveInfo, numSleeves){
 	let crimeChanceColor = Color.preset.red;
 	if(sleeveInfo.crime.chance > 0.25) crimeChanceColor = Color.preset.orange;
 	if(sleeveInfo.crime.chance > 0.50) crimeChanceColor = Color.preset.yellow;
-	if(sleeveInfo.crime.chance > 0.75) crimeChanceColor = Color.preset.lightGreen;
+	if(sleeveInfo.crime.chance > 0.75) crimeChanceColor = Color.preset.green;
 	if(sleeveInfo.crime.chance === 1) crimeChanceColor = Color.preset.cyan;
 
 
 	const g = Color.set("|", Color.preset.white);
-	const activity = (sleeveInfo.crime.isCrime) ? `${Color.set(sleeveInfo.activity, Color.preset.green)} ${Color.set("[", Color.preset.white)}${Color.set(crimeChance + "%", crimeChanceColor)}${Color.set("]", Color.preset.white)}` : Color.set(sleeveInfo.activity, Color.preset.green);
+	const activity = (sleeveInfo.crime.isCrime) ? `${Color.set(sleeveInfo.activity, Color.preset.lightGreen)} ${Color.set("[", Color.preset.white)}${Color.set(crimeChance + "%", crimeChanceColor)}${Color.set("]", Color.preset.white)}` : Color.set(sleeveInfo.activity, Color.preset.lightGreen);
 
 	// Example output:
 	// 🤖 Sleeve-01 - 🔄 100.000% | ⚠️ 18.725% | 💻 ···3 | 💪 ··39 | 🛡️ ··39 | 🙌 ··41 | 🏃 ··41 | Activity: Homicide [20.80%]
-	return ` 🤖 ${sleeveID} ${syncLevel} ${g} ${shckLevel} ${g} ${hck} ${g} ${str} ${g} ${def} ${g} ${dex} ${g} ${agi} ${Color.set("| Activity:", Color.preset.white)} ${activity}`;
+	return ` 🤖 ${sleeveID} ${syncLevel} ${g} ${shckLevel} ${g} ${hck} ${g} ${str} ${g} ${def} ${g} ${dex} ${g} ${agi} ${Color.set("| Task:", Color.preset.white)} ${activity}`;
 }
 
 
@@ -89,6 +89,7 @@ export async function main(ns){
 	const CityName = ns.enums.CityName;
 	const LocationNames = ns.enums.LocationName;
 	const GymType = ns.enums.GymType;
+	const UniType = ns.enums.UniversityClassType;
 
 	while(true){
 		const numSleeves = ns.sleeve.getNumSleeves();
@@ -155,10 +156,10 @@ export async function main(ns){
 			}
 
 			// If any of our skills are below the training threshold...
-			if(skills.strength < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.strength_exp * sleeve.mults.strength) ||
-			skills.defense < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.defense_exp * sleeve.mults.defense) ||
-			skills.dexterity < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.dexterity_exp * sleeve.mults.dexterity) ||
-			skills.agility < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.agility_exp * sleeve.mults.agility)){
+			if(skills.strength < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.strength) ||
+			skills.defense < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.defense) ||
+			skills.dexterity < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.dexterity) ||
+			skills.agility < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.agility)){
 				// Move to Sector12, best gym is there
 				if(sleeve.city !== CityName.Sector12){
 					if(ns.getPlayer().money > TRAVEL_COST){
@@ -176,7 +177,7 @@ export async function main(ns){
 					if(currentTask?.classType !== GymType.strength || currentTask?.location !== LocationNames.Sector12PowerhouseGym){
 						ns.sleeve.setToGymWorkout(sleeveID, LocationNames.Sector12PowerhouseGym, GymType.strength);
 					}
-					sleeveData.activity = "Training STR";
+					sleeveData.activity = `Training STR (${Math.round(TRAINING_THRESHOLD * sleeve.mults.strength)})`;
 					sleeveData.crime.isCrime = false;
 					continue;
 				}
@@ -185,7 +186,7 @@ export async function main(ns){
 					if(currentTask?.classType !== GymType.defense || currentTask?.location !== LocationNames.Sector12PowerhouseGym){
 						ns.sleeve.setToGymWorkout(sleeveID, LocationNames.Sector12PowerhouseGym, GymType.defense);
 					}
-					sleeveData.activity = "Training DEF";
+					sleeveData.activity = `Training DEF (${Math.round(TRAINING_THRESHOLD * sleeve.mults.defense)})`;
 					sleeveData.crime.isCrime = false;
 					continue;
 				}
@@ -194,7 +195,7 @@ export async function main(ns){
 					if(currentTask?.classType !== GymType.dexterity || currentTask?.location !== LocationNames.Sector12PowerhouseGym){
 						ns.sleeve.setToGymWorkout(sleeveID, LocationNames.Sector12PowerhouseGym, GymType.dexterity);
 					}
-					sleeveData.activity = "Training DEX";
+					sleeveData.activity = `Training DEX (${Math.round(TRAINING_THRESHOLD * sleeve.mults.dexterity)})`;
 					sleeveData.crime.isCrime = false;
 					continue;
 				}
@@ -203,10 +204,30 @@ export async function main(ns){
 					if(currentTask?.classType !== GymType.agility || currentTask?.location !== LocationNames.Sector12PowerhouseGym){
 						ns.sleeve.setToGymWorkout(sleeveID, LocationNames.Sector12PowerhouseGym, GymType.agility);
 					}
-					sleeveData.activity = "Training AGI";
+					sleeveData.activity = `Training AGI (${Math.round(TRAINING_THRESHOLD * sleeve.mults.agility)})`;
 					sleeveData.crime.isCrime = false;
 					continue;
 				}
+			}
+
+			if(skills.hacking < Math.ceil(TRAINING_THRESHOLD * sleeve.mults.hacking)){
+				if(sleeve.city !== CityName.Aevum){
+					if(ns.getPlayer().money > TRAVEL_COST){
+						ns.sleeve.travel(sleeveID, CityName.Aevum);
+					} else {
+						ns.sleeve.setToIdle(sleeveID);
+						sleeveData.activity = "Traveling...";
+						sleeveData.crime.isCrime = false;
+						continue;
+					}
+				}
+
+				if(currentTask?.classType !== UniType.algorithms || currentTask?.location !== LocationNames.AevumSummitUniversity){
+					ns.sleeve.setToUniversityCourse(sleeveID, LocationNames.AevumSummitUniversity, UniType.algorithms);
+				}
+				sleeveData.activity = `Training Hack (${Math.round(TRAINING_THRESHOLD * sleeve.mults.hacking)})`;
+				sleeveData.crime.isCrime = false;
+				continue;
 			}
 
 			// Great, now just go commit crimes until we can make a gang.

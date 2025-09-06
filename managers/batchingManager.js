@@ -120,7 +120,7 @@ export async function main(ns){
 		const growRAM = growthThreads * ns.getScriptRam("/scripts/single/grow.js");
 		const hackRAM = hackThreads * ns.getScriptRam("/scripts/single/hack.js");
 
-		ns.ui.setTailTitle(<Colors color="white"> {target} ${numberConvert(ns.getServerMoneyAvailable(target))} (${numberConvert(ns.getServerMaxMoney(target))}) | {Math.round((weakRAM + growRAM + hackRAM) * 100) / 100}GB | <Timer countdown={weakTime + cycleEndStart + gap} startTime={Date.now()} /> [{timeConvert(weakTime + cycleEndStart + gap)}]</Colors>);
+		ns.ui.setTailTitle(<Colors color="white"> {target} ${numberConvert(ns.getServerMoneyAvailable(target))} (${numberConvert(ns.getServerMaxMoney(target))}) | {ns.formatRam(weakRAM + growRAM + hackRAM)} | <Timer countdown={weakTime + cycleEndStart + gap} startTime={Date.now()} /> [{timeConvert(weakTime + cycleEndStart + gap)}]</Colors>);
 
 		setTimeout(() => {
 			spawnExec(ns, "grow", Math.ceil(growthThreads), target, weakenStart);
