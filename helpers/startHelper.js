@@ -4,7 +4,8 @@ export async function main(ns){
 	if(hasMoney){
 		try {
 			ns.singularity.goToLocation("Alpha Enterprises");
-			ns.singularity.purchaseTor();
+			const purchased = ns.singularity.purchaseTor();
+			if(purchased) ns.toast("Purchased TOR Router", "info", 10000);
 			ns.singularity.goToLocation("The Slums");
 			ns.singularity.commitCrime("Shoplift");
 			ns.singularity.setFocus(true);

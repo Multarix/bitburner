@@ -27,7 +27,7 @@ export async function main(ns){
 		let RAMFine = false;
 		let coresFine = false;
 		let boughtItems = 0;
-		while((!RAMFine || !coresFine || boughtItems !== 5)){
+		while((!RAMFine || !coresFine || (boughtItems < 5))){
 			const server = ns.getServer("home");
 			const money = server.moneyAvailable;
 			const currentRam = server.maxRam;
@@ -43,6 +43,7 @@ export async function main(ns){
 					continue;
 				}
 
+				ns.print(boughtItems);
 				if(boughtItems === 5) break;
 
 				const cost = ns.singularity.getDarkwebProgramCost(item);
@@ -50,7 +51,7 @@ export async function main(ns){
 					const boughtItem = ns.singularity.purchaseProgram(item);
 					owns[item] = boughtItem;
 					if(boughtItem){
-						ns.toast(`Bought '${item}' for $${ns.formatNumber(cost, 3, 1000, true)}`, 5000);
+						ns.toast(`Bought '${item}' for $${ns.formatNumber(cost, 3, 1000, true)}`, "info", 10000);
 						ns.print(`Bought ${Color.set(item, Color.preset.yellow)} for ${Color.set("$" + ns.formatNumber(cost, 3, 1000, true)), Color.preset.lime}`);
 					}
 				}
@@ -61,7 +62,7 @@ export async function main(ns){
 				const ramCost = ns.singularity.getUpgradeHomeRamCost();
 				if(money > ramCost * 1.2){
 					ns.singularity.upgradeHomeRam();
-					ns.toast(`Upgraded RAM for $${ns.formatNumber(ramCost, 3, 1000, true)}`, 5000);
+					ns.toast(`Upgraded RAM for $${ns.formatNumber(ramCost, 3, 1000, true)}`, "info", 10000);
 					ns.print(`Upgraded ${Color.set("RAM", Color.preset.yellow)} for ${Color.set("$" + ns.formatNumber(ramCost, 3, 1000, true)), Color.preset.lime}`, 5000);
 				}
 
@@ -72,7 +73,7 @@ export async function main(ns){
 				const coreCost = ns.singularity.getUpgradeHomeCoresCost();
 				if(money > coreCost * 1.2){
 					ns.singularity.upgradeHomeCores();
-					ns.toast(`Upgraded Cores for $${ns.formatNumber(coreCost, 3, 1000, true)}`, 5000);
+					ns.toast(`Upgraded Cores for $${ns.formatNumber(coreCost, 3, 1000, true)}`, "info", 10000);
 					ns.print(`Upgraded ${Color.set("Cores", Color.preset.yellow)} for ${Color.set("$" + ns.formatNumber(coreCost, 3, 1000, true)), Color.preset.lime}`, 5000);
 				}
 

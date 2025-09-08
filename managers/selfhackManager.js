@@ -7,6 +7,8 @@ export async function main(ns){
 	ns.disableLog("ALL");
 	ns.clearLog();
 	// ns.ui.openTail();
+
+	/** @type {*} */
 	const allServers = JSON.parse(ns.read("/helpers/servers.txt"));
 
 	const growScript = `/scripts/auto/grow.js`;
@@ -23,6 +25,7 @@ export async function main(ns){
 			if(server.name === "home" || server.name.startsWith("hack-")) continue; // Ignore owned servers
 
 			if(hackLevel > server.hackLevel && maxPorts >= server.ports && !server.hacked){
+				console.log(server.name);
 				if(!ns.hasRootAccess(server.name)){
 					gainRoot(ns, server.name);
 					await ns.sleep(1000);
@@ -31,11 +34,11 @@ export async function main(ns){
 						ns.print(red(`There was an issue gaining root access on ${server.name}!`));
 						continue;
 					}
+				}
 
-					if(factions.includes(server.name)){
-						ns.run("/helpers/selfHackHelper.js", 1, server.name); // Won't turn on if not enough RAM, as this uses singularity.
-						await ns.sleep(1000);
-					}
+				if(factions.includes(server.name)){
+					ns.run("/helpers/selfHackHelper.js", 1, server.name); // Won't turn on if not enough RAM, as this uses singularity.
+					await ns.sleep(1000);
 				}
 
 				server.hacked = true;

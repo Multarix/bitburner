@@ -185,6 +185,9 @@ export async function main(ns){
 	ns.clearLog();
 	ns.ui.openTail();
 	ns.ui.setTailTitle("\u200b Gang Manager");
+
+	currentTick = -1;
+
 	memberPrepped.splice(0, memberPrepped.length);
 	membersAscended.splice(0, membersAscended.length);
 	memberStats.splice(0, memberStats.length);

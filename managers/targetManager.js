@@ -74,7 +74,7 @@ export async function main(ns){
 
 			if(newTarget){ // We now have a new target
 				ns.toast(`New target: ${target.name} | Ports: ${target.ports} | Money: $${numberConvert(target.maxMoney)}`, "info", 15000);
-				ns.printRaw(<Colors color="white"> New target: <Colors color="yellow">{target.name}</Colors> | Ports: <Colors color="magenta">{target.ports}</Colors> | Money: <Colors color="cyan">{"$" + numberConvert(target.maxMoney)}</Colors></Colors>);
+				ns.printRaw(<Colors color="white"> New target: <Colors color="yellow">{target.name}</Colors> | Ports: <Colors color="magenta">{target.ports}</Colors> | Money: <Colors color="lime">{"$" + numberConvert(target.maxMoney)}</Colors></Colors>);
 				ns.ui.setTailTitle(<Colors color="white"> Target Manager | {target.name} - ${numberConvert(target.maxMoney)}</Colors>);
 
 				ns.clearPort(20);
