@@ -1,12 +1,12 @@
 import { Color, progressBar, FiraCodeLoading } from "helpers/Functions";
 
 // Variables, change at will
-const buyingWeapons = true;
-const buyingArmor = true;
-const buyingVehicles = true;
+const buyingWeapons = false;
+const buyingArmor = false;
+const buyingVehicles = false;
 const buyingRootkits = false;
 const buyingAugmentations = true;
-const RESPECT_BEFORE_MONEY = 4000000000;
+const RESPECT_BEFORE_MONEY = 1000000; // 1 mil?
 const TRAINING_THRESHOLD = 500;
 const MAX_ASCENSION_MULTIPLIER = 100;
 
@@ -311,6 +311,8 @@ export async function main(ns){
 		let longest3 = 0;
 		let longest4 = 0;
 		let longest5 = 0;
+		const longest6 = 0;
+		const longest7 = 0;
 
 		for(const member of members){
 			const mem = ns.gang.getMemberInformation(member);
@@ -423,31 +425,25 @@ export async function main(ns){
 			}
 
 			try { // Member Ascension
+				// TODO: Change this to only ascend when the multiplier is double the previous
 				const memberInfo = ns.gang.getMemberInformation(mem); // Get entire gang member object from name.
 				const ascResult = ns.gang.getAscensionResult(mem); // Get the result of an ascension without ascending.
 
 				if(ascResult != undefined){
-					const next_point_exp = (isHacking) ? memberInfo.hack_exp : memberInfo.dex_exp;
-					const next_Point = Math.max(next_point_exp - 1000, 0); // Stolen from game source code, who need Formulas.exe anyway?
-					// const next_Point = ns.formulas.gang.ascensionPointsGain(next_point_exp);
+					const ascResType = (isHacking) ? "hack" : "dex";
+					const memCurrentMult = (isHacking) ? "hack_asc_mult" : "dex_asc_mult";
 
-					const asc_points = (isHacking) ? memberInfo.hack_asc_points : memberInfo.dex_asc_points;
-					const next_Mult_exp = asc_points + next_Point;
-					const next_Mult = Math.max(Math.pow(next_Mult_exp / 2000, 0.5), 1); // Stolen from game source code, who need Formulas.exe anyway?
-					// const next_Mult = ns.formulas.gang.ascensionMultiplier(next_Mult_exp);
+					const current_Mult = memberInfo[memCurrentMult];
+					const currentAscMul = ascResult[ascResType];
+					const multThreshold = 2;
 
-					const current_Mult = (isHacking) ? memberInfo.hack_asc_mult : memberInfo.dex_asc_mult;
-
-					const nxtmutlp_div_by_currentmultp = (next_Mult / current_Mult);
-					const calculated_asc_threshold = getAscendThreshold(current_Mult);
-
-					const doAsc = nxtmutlp_div_by_currentmultp >= calculated_asc_threshold;
+					const doAsc = (currentAscMul >= 2);
 
 					const readyText = doAsc ? Color.set("  Level Up!  ", Color.preset.lime) : Color.set(" XP Required ", Color.preset.gray);
 					const curMultColor = doAsc ? Color.preset.green : Color.preset.red;
-					const curMult = Color.set(nxtmutlp_div_by_currentmultp.toFixed(5), curMultColor);
+					const curMult = Color.set(currentAscMul.toFixed(5), curMultColor);
 					const symbol = doAsc ? "≥" : "<";
-					const ascThreshold = Color.set(calculated_asc_threshold.toFixed(4), Color.preset.lightPurple);
+					const ascThreshold = Color.set(multThreshold.toFixed(2), Color.preset.lightPurple);
 					const multiplier = `\u0078${ns.formatNumber(current_Mult, 0, 1000000)}`.padStart(multLength + 1);
 					const multi = `(${Color.set(multiplier, Color.preset.lightYellow)})`;
 
@@ -456,10 +452,10 @@ export async function main(ns){
 						prepping = `${Color.set(totalUpgrades, Color.preset.red)}/${Color.set(maxPrepCount, Color.preset.green)}`;
 					}
 
-					const output = `${member_name}:  ${curMult} ${symbol} ${ascThreshold} ${multi}  -  ${lbracket}${readyText}${rbracket} ${prepping}`;
+					const output = `${member_name} ${multi}: ${curMult} ${symbol} ${ascThreshold}  -  ${lbracket}${readyText}${rbracket} ${prepping}`;
 					ns.print(output);
 
-					/*
+					/* guide
                         ASCEND
                         ------
                         Doing Ascend(_mem) here, because there is a glitch that prevents

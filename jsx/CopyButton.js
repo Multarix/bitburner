@@ -9,7 +9,8 @@ const addCustomStyle = () => {
 		border-radius: 0px;
 		font-weight: 1000;
 		background-color: #333;
-		padding: 0.8em 0.5em;
+		padding: 0.2em 0.5em;
+		font-family: cursive;
 		
 		&:hover {
 			background-color: #555;

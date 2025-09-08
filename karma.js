@@ -13,8 +13,14 @@ export async function main(ns){
 			ns.alert("Your karma has decreased enough to form a gang!");
 			hasAlerted = true;
 
+			ns.run("/helpers/joinFaction.js", { threads: 1, preventDuplicates: true }); // Because of singularity
+			await ns.sleep(5000);
+
 			const formedGang = ns.gang.createGang("Slum Snakes");
-			if(formedGang) ns.spawn("/managers/gangManager.js", { spawnDelay: 5000, threads: 1 });
+			if(formedGang){
+				ns.run("/managers/gangManager.js", { threads: 1, preventDuplicates: true });
+				ns.exit();
+			}
 		}
 		await ns.sleep(100);
 	}

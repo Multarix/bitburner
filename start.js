@@ -60,7 +60,10 @@ export async function main(ns){
 	if(bigHack){
 		const money = ns.getPlayer().money;
 		if(money > 210000 && !ns.hasTorRouter()){
-			ns.run("/helpers/startHelper.js");
+			ns.run("/helpers/startHelper.js", 1, true);
+			await ns.sleep(1000);
+		} else {
+			ns.run("/helpers/startHelper.js", 1, false);
 			await ns.sleep(1000);
 		}
 
