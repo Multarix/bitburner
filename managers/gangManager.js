@@ -7,7 +7,7 @@ const buyingVehicles = false;
 const buyingRootkits = false;
 const buyingAugmentations = true;
 const RESPECT_BEFORE_MONEY = 1000000; // 1 mil?
-const TRAINING_THRESHOLD = 500;
+const TRAINING_THRESHOLD = 1000;
 const MAX_ASCENSION_MULTIPLIER = 100;
 
 // Constants, don't change
@@ -314,8 +314,6 @@ export async function main(ns){
 		let longest3 = 0;
 		let longest4 = 0;
 		let longest5 = 0;
-		const longest6 = 0;
-		const longest7 = 0;
 
 		for(const member of members){
 			const mem = ns.gang.getMemberInformation(member);
@@ -428,7 +426,6 @@ export async function main(ns){
 			}
 
 			try { // Member Ascension
-				// TODO: Change this to only ascend when the multiplier is double the previous
 				const memberInfo = ns.gang.getMemberInformation(mem); // Get entire gang member object from name.
 				const ascResult = ns.gang.getAscensionResult(mem); // Get the result of an ascension without ascending.
 
@@ -440,7 +437,7 @@ export async function main(ns){
 					const currentAscMul = ascResult[ascResType];
 					const multThreshold = 2;
 
-					const doAsc = (currentAscMul >= 2);
+					const doAsc = (currentAscMul >= 2); // Double the current ascension bonus, this takes longer but when they ascend they're that much stronger
 
 					const readyText = doAsc ? Color.set("  Level Up!  ", Color.preset.lime) : Color.set(" XP Required ", Color.preset.gray);
 					const curMultColor = doAsc ? Color.preset.green : Color.preset.red;
@@ -458,23 +455,10 @@ export async function main(ns){
 					const output = `${member_name} ${multi}: ${curMult} ${symbol} ${ascThreshold}  -  ${lbracket}${readyText}${rbracket} ${prepping}`;
 					ns.print(output);
 
-					/* guide
-                        ASCEND
-                        ------
-                        Doing Ascend(_mem) here, because there is a glitch that prevents
-                        the output string from displaying when Ascend(_mem)
-                        is lumped into the 'else if (multchange >= 2.0){ ... }' conditional area.
-                    */
-					if(doAsc && MAX_ASCENSION_MULTIPLIER >= current_Mult){
+					if(doAsc && memberInfo.respectGain / gangInfo.respect < 0.30){ // Member will only ascend if they account for less than x% of the total respect
 						await ns.sleep(50);
 						ns.gang.ascendMember(mem);
 						membersAscended.push(mem);
-
-						// As long as ascending doesn't drop us below x% of our max respect we've ever achieved, ascend
-						// if(gangInfo.respect - memberInfo.earnedRespect > minRespect){
-						// 	ns.gang.ascendMember(mem);
-						// 	membersAscended.push(mem);
-						// }
 					}
 				}
 			} catch (e){
