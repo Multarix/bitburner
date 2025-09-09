@@ -1,11 +1,11 @@
 import { Color } from "helpers/Functions";
 
-const IGNORE_SYNC_SHOCK = true; // Toggle this if sleeves should ignore trying to recover or sync
+const IGNORE_SYNC_SHOCK = false; // Toggle this if sleeves should ignore trying to recover or sync
 
 const TRAINING_THRESHOLD = 40;
 const MIN_SYNC = 95;
 const MAX_SYNC = 100;
-const MAX_SHOCK = 5;
+const MAX_SHOCK = 10;
 const MIN_SHOCK = 0;
 const TRAVEL_COST = 200000;
 const BUY_AUGMENTS = true;
@@ -92,6 +92,7 @@ export async function main(ns){
 	const UniType = ns.enums.UniversityClassType;
 
 	while(true){
+		const inGang = ns.gang.inGang();
 		const numSleeves = ns.sleeve.getNumSleeves();
 		for(let i = 0; i < numSleeves; i++){
 			if(!sleeves[i.toString()]){
@@ -139,7 +140,8 @@ export async function main(ns){
 			if(!sleeveData.shouldSync && sleeve.sync <= MIN_SYNC) sleeveData.shouldSync = true;
 			if(sleeve.sync >= MAX_SYNC) sleeveData.shouldSync = false;
 
-			if(!IGNORE_SYNC_SHOCK){
+			// Honestly getting a gang going/ karma down > skill xp
+			if(!IGNORE_SYNC_SHOCK && inGang){
 				if(sleeveData.shouldSync){ // Sync before we do anything with it
 					if(currentTask?.type !== "SYNCHRO") ns.sleeve.setToSynchronize(sleeveID);
 					sleeveData.activity = "Synchronizing";
@@ -235,7 +237,7 @@ export async function main(ns){
 			let crimeToCommit = CrimeType.shoplift;
 			if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.mug) > 0.9) crimeToCommit = CrimeType.mug;
 			if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.homicide) > 0.15) crimeToCommit = CrimeType.homicide;
-			if(ns.gang.inGang()){
+			if(inGang){
 				if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.grandTheftAuto) > 0.75) crimeToCommit = CrimeType.grandTheftAuto;
 				if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.assassination) > 0.80) crimeToCommit = CrimeType.assassination;
 				if(ns.formulas.work.crimeSuccessChance(sleeve, CrimeType.heist) > 0.85) crimeToCommit = CrimeType.heist;

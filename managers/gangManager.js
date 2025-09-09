@@ -6,7 +6,7 @@ const buyingArmor = false;
 const buyingVehicles = false;
 const buyingRootkits = false;
 const buyingAugmentations = true;
-const RESPECT_BEFORE_MONEY = 1000000; // 1 mil?
+const RESPECT_BEFORE_MONEY = 1000000000; // 1 mil?
 const TRAINING_THRESHOLD = 1000;
 const MAX_ASCENSION_MULTIPLIER = 100;
 

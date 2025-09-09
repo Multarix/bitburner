@@ -7,6 +7,16 @@ export async function main(ns){
 
 	ns.print(Color.set("Starting Script!", Color.preset.lightGreen));
 
+	const cityNames = ns.enums.CityName;
+	const locationNames = ns.enums.LocationName;
+	// const TRAVEL_COST = 200000;
+
+	const buyLocation = {};
+	buyLocation[cityNames.Sector12] = locationNames.Sector12AlphaEnterprises;
+	buyLocation[cityNames.Aevum] = locationNames.AevumFulcrumTechnologies;
+	buyLocation[cityNames.Volhaven] = locationNames.VolhavenOmniTekIncorporated;
+	buyLocation[cityNames.Ishima] = locationNames.IshimaOmegaSoftware;
+
 	try {
 		while(!ns.hasTorRouter()){
 			if(ns.getPlayer().money > 200000){
@@ -16,6 +26,7 @@ export async function main(ns){
 			await ns.sleep(10000);
 		}
 
+
 		const programs = {
 			"BruteSSH.exe": ns.fileExists("BruteSSH.exe"),
 			"FTPCrack.exe": ns.fileExists("FTPCrack.exe"),
@@ -24,67 +35,83 @@ export async function main(ns){
 			"SQLInject.exe": ns.fileExists("SQLInject.exe")
 		};
 
-		let RAMFine = false;
-		let coresFine = false;
-		let boughtItems = 0;
-		while((!RAMFine || !coresFine || (boughtItems < 5))){
-			const server = ns.getServer("home");
-			const money = server.moneyAvailable;
-			// const currentRam = server.maxRam;
-			// const currentCores = server.cpuCores;
+		for(const item in programs){
+			if(programs[item]) ns.print(`Already own ${Color.set(item, Color.preset.yellow)}!`);
+		}
 
-			RAMFine = true;
-			coresFine = true;
 
-			boughtItems = 0;
+		let continueCycle = true;
+		while(continueCycle){
+			continueCycle = false;
 			for(const item in programs){
-				if(programs[item]){
-					boughtItems += 1;
-					continue;
+				// ns.print(item, " -> ", programs[item]);
+
+				if(!programs[item]){
+					continueCycle = true;
+					// ns.print(`Attempting to buy ${Color.set(item, Color.preset.yellow)}...`);
+
+					const cost = ns.singularity.getDarkwebProgramCost(item);
+					if(ns.getPlayer().money > cost * 1.2){
+						const boughtItem = ns.singularity.purchaseProgram(item);
+						if(boughtItem){
+							programs[item] = true;
+							ns.toast(`Bought '${item}' for $${ns.formatNumber(cost, 3, 1000, true)}`, "info", 10000);
+							ns.print(`Bought ${Color.set(item, Color.preset.yellow)} for ${Color.set("$" + ns.formatNumber(cost, 3, 1000, true), Color.preset.lime)}`);
+						}
+					}
 				}
 
-				ns.print(boughtItems);
+				await ns.sleep(100);
+			}
+		}
 
-				const cost = ns.singularity.getDarkwebProgramCost(item);
-				if(money > cost * 1.2){
-					const boughtItem = ns.singularity.purchaseProgram(item);
-					programs[item] = boughtItem;
-					if(boughtItem){
-						ns.toast(`Bought '${item}' for $${ns.formatNumber(cost, 3, 1000, true)}`, "info", 10000);
-						ns.print(`Bought ${Color.set(item, Color.preset.yellow)} for ${Color.set("$" + ns.formatNumber(cost, 3, 1000, true)), Color.preset.lime}`);
+
+		let ramFine = false;
+		let coresFine = false;
+		while((!ramFine || !coresFine)){
+			const home = ns.getServer("home");
+			const cpuCores = home.cpuCores;
+			const ram = home.maxRam;
+
+			ramFine = ram >= 64000;
+			coresFine = cpuCores >= 8;
+
+			if(!ramFine){
+				const cost = ns.singularity.getUpgradeHomeRamCost();
+				// If we can afford it...
+				if(ns.getPlayer().money > cost * 1.1){
+					// Move player if not in a city that can buy it
+					if(!buyLocation[ns.getPlayer().city]) ns.singularity.travelToCity(cityNames.Sector12);
+					ns.singularity.goToLocation(buyLocation[ns.getPlayer().city]);
+					const upgraded = ns.singularity.upgradeHomeRam();
+
+					if(upgraded){
+						ns.toast(`Upgraded RAM for $${ns.formatNumber(cost, 3, 1000, true)} ${ns.formatRam(ram)} ➜ ${ns.formatRam(ram * 2)}`, "info", 10000);
+						ns.print(`Upgraded ${Color.set("RAM", Color.preset.yellow)} for $${ns.formatNumber(cost, 3, 1000, true)} ${ns.formatRam(ram)} ➜ ${ns.formatRam(ram * 2)}`);
 					}
 				}
 			}
 
-			/*
-			if(currentRam < 64000){ // 64TB
-				RAMFine = false;
+			if(!ramFine){
+				const cost = ns.singularity.getUpgradeHomeCoresCost();
+				// If we can afford it...
+				if(ns.getPlayer().money > cost * 1.1){
+					// Move player if not in a city that can buy it
+					if(!buyLocation[ns.getPlayer().city]) ns.singularity.travelToCity(cityNames.Sector12);
+					ns.singularity.goToLocation(buyLocation[ns.getPlayer().city]);
+					const upgraded = ns.singularity.upgradeHomeCores();
 
-				ns.singularity.travelToCity("Sector-12");
-				const ramCost = ns.singularity.getUpgradeHomeRamCost();
-				if(money > ramCost * 1.2){
-					ns.singularity.upgradeHomeRam();
-					ns.toast(`Upgraded RAM for $${ns.formatNumber(ramCost, 3, 1000, true)}`, "info", 10000);
-					ns.print(`Upgraded ${Color.set("RAM", Color.preset.yellow)} for ${Color.set("$" + ns.formatNumber(ramCost, 3, 1000, true)), Color.preset.lime}`, 5000);
+					if(upgraded){
+						ns.toast(`Upgraded CPU Cores for $${ns.formatNumber(cost, 3, 1000, true)} ${cpuCores} ➜ ${cpuCores + 1}`, "info", 10000);
+						ns.print(`Upgraded ${Color.set("CPU Cores", Color.preset.yellow)} for $${ns.formatNumber(cost, 3, 1000, true)} ${cpuCores} ➜ ${cpuCores + 1}`);
+					}
 				}
-
 			}
-
-			if(currentCores < 8){
-				coresFine = false;
-
-				const coreCost = ns.singularity.getUpgradeHomeCoresCost();
-				if(money > coreCost * 1.2){
-					ns.singularity.upgradeHomeCores();
-					ns.toast(`Upgraded Cores for $${ns.formatNumber(coreCost, 3, 1000, true)}`, "info", 10000);
-					ns.print(`Upgraded ${Color.set("Cores", Color.preset.yellow)} for ${Color.set("$" + ns.formatNumber(coreCost, 3, 1000, true)), Color.preset.lime}`, 5000);
-				}
-
-			}
-			*/
-			await ns.sleep(1000);
 		}
+
 	} catch (e){
-		return;
+		ns.print(e);
+		ns.ui.openTail();
+		ns.exit();
 	}
 }
