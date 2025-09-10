@@ -41,7 +41,9 @@ export async function main(ns){
 
 
 		let continueCycle = true;
-		while(continueCycle){
+		let ramFine = false;
+		let coresFine = false;
+		while((continueCycle || !ramFine || coresFine)){
 			continueCycle = false;
 			for(const item in programs){
 				// ns.print(item, " -> ", programs[item]);
@@ -63,12 +65,7 @@ export async function main(ns){
 
 				await ns.sleep(100);
 			}
-		}
 
-
-		let ramFine = false;
-		let coresFine = false;
-		while((!ramFine || !coresFine)){
 			const home = ns.getServer("home");
 			const cpuCores = home.cpuCores;
 			const ram = home.maxRam;
@@ -87,12 +84,12 @@ export async function main(ns){
 
 					if(upgraded){
 						ns.toast(`Upgraded RAM for $${ns.formatNumber(cost, 3, 1000, true)} ${ns.formatRam(ram)} ➜ ${ns.formatRam(ram * 2)}`, "info", 10000);
-						ns.print(`Upgraded ${Color.set("RAM", Color.preset.yellow)} for $${ns.formatNumber(cost, 3, 1000, true)} ${ns.formatRam(ram)} ➜ ${ns.formatRam(ram * 2)}`);
+						ns.print(`Upgraded ${Color.set("RAM", Color.preset.yellow)} for ${Color.set("$" + ns.formatNumber(cost, 3, 1000, true), Color.preset.lime)} ${ns.formatRam(ram)} ➜ ${ns.formatRam(ram * 2)}`);
 					}
 				}
 			}
 
-			if(!ramFine){
+			if(!coresFine){
 				const cost = ns.singularity.getUpgradeHomeCoresCost();
 				// If we can afford it...
 				if(ns.getPlayer().money > cost * 1.1){
@@ -103,10 +100,12 @@ export async function main(ns){
 
 					if(upgraded){
 						ns.toast(`Upgraded CPU Cores for $${ns.formatNumber(cost, 3, 1000, true)} ${cpuCores} ➜ ${cpuCores + 1}`, "info", 10000);
-						ns.print(`Upgraded ${Color.set("CPU Cores", Color.preset.yellow)} for $${ns.formatNumber(cost, 3, 1000, true)} ${cpuCores} ➜ ${cpuCores + 1}`);
+						ns.print(`Upgraded ${Color.set("CPU Cores", Color.preset.yellow)} for ${Color.set("$" + ns.formatNumber(cost, 3, 1000, true), Color.preset.lime)} ${cpuCores} ➜ ${cpuCores + 1}`);
 					}
 				}
 			}
+
+			await ns.sleep(10000);
 		}
 
 	} catch (e){

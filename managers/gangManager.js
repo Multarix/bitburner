@@ -40,26 +40,6 @@ let currentTick = -1;
 let maxPrepCount = 0;
 
 
-
-function getAscendThreshold(mult){
-	if(mult < 1.632) return 1.6326;
-	if(mult < 2.336) return 1.4315;
-	if(mult < 2.999) return 1.284;
-	if(mult < 3.363) return 1.2125;
-	if(mult < 4.253) return 1.1698;
-	if(mult < 4.860) return 1.1428;
-	if(mult < 5.455) return 1.1225;
-	if(mult < 5.977) return 1.0957;
-	if(mult < 6.496) return 1.0869;
-	if(mult < 7.008) return 1.0789;
-	if(mult < 7.519) return 1.073;
-	if(mult < 8.025) return 1.0673;
-	if(mult < 8.513) return 1.0631;
-	return 1.0591;
-}
-
-
-
 // Recruit a new prospect to a full gang member.
 /** @param {NS} ns */
 async function recruitMember(ns, MemberNames){
@@ -69,7 +49,6 @@ async function recruitMember(ns, MemberNames){
 	ns.gang.setMemberTask(availableNames[0], trainStat); // Set to train initially.
 	await ns.sleep(50);
 }
-
 
 
 // Attempt to assign Gang Member specified tasks

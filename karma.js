@@ -8,6 +8,7 @@ export async function main(ns){
 	let hasAlerted = false;
 	while(true){
 		const karma = ns.getPlayer().karma.toFixed(2);
+		ns.clearLog();
 		ns.print(`Karma: ${karma}`);
 		if(!hasAlerted && ns.getPlayer().karma <= -54000){
 			ns.alert("Your karma has decreased enough to form a gang!");

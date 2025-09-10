@@ -343,6 +343,9 @@ export class Color {
 		darkPurple: 5,
 		purple: 129,
 		lightPurple: 141,
+		darkPink: 201,
+		pink: 213,
+		lightPink: 225,
 		white: 15
 	};
 
