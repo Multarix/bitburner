@@ -10465,6 +10465,8 @@ interface EveryRequirement {
   conditions: PlayerRequirement[];
 }
 
+export type Task = StudyTask | CompanyWorkTask | CreateProgramWorkTask | CrimeTask | FactionWorkTask | GraftingTask;
+
 /**
  * Structured interface to requirements for joining a faction or company.
  * For fields with numerical value \> 0, the player must have at least this value.

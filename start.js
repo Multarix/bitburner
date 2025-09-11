@@ -68,10 +68,11 @@ export async function main(ns){
 		}
 
 		gainRoot(ns, "foodnstuff");
-		await ns.sleep(500);
+		await ns.sleep(1000);
 
+		const thisScriptRam = ns.getScriptRam("/start.js");
 		const waitTime = ns.getWeakenTime("foodnstuff");
-		const maxThreads = Math.floor((homeRAM - 16) / ns.getScriptRam("/scripts/single/weaken.js"));
+		const maxThreads = Math.floor((homeRAM - thisScriptRam) / ns.getScriptRam("/scripts/single/weaken.js"));
 		ns.run("/scripts/single/weaken.js", maxThreads, "foodnstuff");
 		ns.print(`Doing mass weaken for exp | ETA: ${white(timeConvert(waitTime + 2000))}`);
 
@@ -95,6 +96,24 @@ export async function main(ns){
 	ns.print(`Selfhack Manager Started`, "info");
 
 
+	if(ns.gang.inGang()){
+		ns.exec("managers/gangManager.js", "home", { threads: 1, preventDuplicates: true });
+		ns.toast("Gang manager was started", "info");
+	}
+
+	if(ns.sleeve.getNumSleeves() > 0){ // Kinda hefty to start, ~64GB RAM
+		ns.exec("managers/sleeveManager.js", "home", { threads: 1, preventDuplicates: true });
+		ns.toast("Sleeve manager was started", "info");
+	}
+
+
+	ns.exec("/managers/targetManager.jsx", "home", { threads: 1, preventDuplicates: true });
+	ns.exec("/managers/buyServer.js", "home", { threads: 1, preventDuplicates: true });
+
+	ns.exec("/managers/autoBuyer.js", "home", { threads: 1, preventDuplicates: true }); // Uses singularity.
+	ns.exec("/managers/factionManager.js", "home", { threads: 1, preventDuplicates: true }); // Uses singularity.
+
+
 	// Even without formulas.exe, we can start the hacknet manager... but only if we pass an arg to the script
 	const runHacknetManager = await ns.prompt("Start the Hacknet Manager?", { type: "boolean" });
 	if(runHacknetManager){
@@ -110,23 +129,4 @@ export async function main(ns){
 			ns.toast("Stockmarket manager was started!");
 		}
 	}
-
-	ns.exec("/managers/buyServer.js", "home", { threads: 1, preventDuplicates: true });
-	ns.exec("/managers/sleeveManager.js", "home", { threads: 1, preventDuplicates: true });
-	ns.exec("/managers/autoBuyer.js", "home", { threads: 1, preventDuplicates: true }); // Uses singularity.
-
-	if(ns.gang.inGang()){
-		ns.exec("managers/gangManager.js", "home", { threads: 1, preventDuplicates: true });
-		ns.toast("Gang manager was started", "info");
-	}
-
-	if(ns.sleeve.getNumSleeves() > 0){ // Kinda hefty to start, ~64GB RAM
-		ns.exec("managers/sleeveManager.js", "home", { threads: 1, preventDuplicates: true });
-		ns.toast("Sleeve manager was started", "info");
-	}
-
-	// This might fix an ongoing bug...
-	// ns.mv("home", "/managers/targetManager.jsx", "/managers/targetManager.js");
-	// ns.mv("home", "/managers/targetManager.js", "/managers/targetManager.jsx");
-	ns.exec("/managers/targetManager.jsx", "home", { threads: 1, preventDuplicates: true });
 }

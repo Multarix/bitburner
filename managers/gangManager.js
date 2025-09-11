@@ -6,9 +6,9 @@ const buyingArmor = false;
 const buyingVehicles = false;
 const buyingRootkits = false;
 const buyingAugmentations = true;
-const RESPECT_BEFORE_MONEY = 1000000000; // 1 mil?
+const RESPECT_BEFORE_MONEY = 100000; // 100k
 const TRAINING_THRESHOLD = 1000;
-const MAX_ASCENSION_MULTIPLIER = 100;
+const MAX_ASCENSION_MULTIPLIER = 128;
 
 // Constants, don't change
 const warTick = 9;
@@ -97,14 +97,26 @@ function prepareMember(ns, name){
 		if(buyingAugmentations){ // Augments
 			for(const item of HackAugs){
 				if(memberInformation.augmentations.includes(item)) continue;
-				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
+				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money){
+
+					const purchased = ns.gang.purchaseEquipment(name, item);
+					if(purchased){
+						ns.toast(`${name} bought ${item} (💲${ns.formatNumber(ns.gang.getEquipmentCost(item))})`, "info", 8000);
+					}
+				}
 			}
 		}
 
 		if(buyingRootkits){ // Rootkits
 			for(const item of Rootkits){
 				if(memberInformation.upgrades.includes(item)) continue;
-				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
+				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money){
+
+					const purchased = ns.gang.purchaseEquipment(name, item);
+					if(purchased){
+						ns.toast(`${name} bought ${item} (💲${ns.formatNumber(ns.gang.getEquipmentCost(item))})`, "info", 8000);
+					}
+				}
 			}
 		}
 	}
@@ -115,28 +127,52 @@ function prepareMember(ns, name){
 		if(buyingAugmentations){ // Augments
 			for(const item of CrimeAugs){
 				if(memberInformation.augmentations.includes(item)) continue;
-				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
+				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money){
+
+					const purchased = ns.gang.purchaseEquipment(name, item);
+					if(purchased){
+						ns.toast(`${name} bought ${item} (💲${ns.formatNumber(ns.gang.getEquipmentCost(item))})`, "info", 8000);
+					}
+				}
 			}
 		}
 
 		if(buyingWeapons){ // Weapons
 			for(const item of Weapons){
 				if(memberInformation.upgrades.includes(item)) continue;
-				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
+				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money){
+
+					const purchased = ns.gang.purchaseEquipment(name, item);
+					if(purchased){
+						ns.toast(`${name} bought ${item} (💲${ns.formatNumber(ns.gang.getEquipmentCost(item))})`, "info", 8000);
+					}
+				}
 			}
 		}
 
 		if(buyingArmor){ // Armor
 			for(const item of Armor){
 				if(memberInformation.upgrades.includes(item)) continue;
-				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
+				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money){
+
+					const purchased = ns.gang.purchaseEquipment(name, item);
+					if(purchased){
+						ns.toast(`${name} bought ${item} (💲${ns.formatNumber(ns.gang.getEquipmentCost(item))})`, "info", 8000);
+					}
+				}
 			}
 		}
 
 		if(buyingVehicles){ // Vehicles
 			for(const item of Vehicles){
 				if(memberInformation.upgrades.includes(item)) continue;
-				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money) ns.gang.purchaseEquipment(name, item);
+				if(ns.gang.getEquipmentCost(item) < ns.getPlayer().money){
+
+					const purchased = ns.gang.purchaseEquipment(name, item);
+					if(purchased){
+						ns.toast(`${name} bought ${item} (💲${ns.formatNumber(ns.gang.getEquipmentCost(item))})`, "info", 8000);
+					}
+				}
 			}
 		}
 	}
@@ -200,7 +236,7 @@ export async function main(ns){
 		ns.ui.setTailTitle(`\u200b Gang Manager (Tick: ${currentTick})`);
 
 		ns.ui.setTailFontSize(14);
-		ns.ui.resizeTail(1035, 860);
+		ns.ui.resizeTail(900, 860);
 		ns.clearLog();
 
 		const members = ns.gang.getMemberNames();
@@ -378,24 +414,26 @@ export async function main(ns){
 		const multLength = Math.round(highestMult).toString().length;
 
 		ns.print("\n");
-		ns.print(" 👑 Ascension, sorted by highest multiplier");
+		ns.print(" 👑 Ascension, sorted by cloest to ascending:");
 
 		const lbracket = Color.set("[", Color.preset.lightGray);
 		const rbracket = Color.set("]", Color.preset.lightGray);
 
 		members.sort((a, b) => {
-			const aInfo = ns.gang.getMemberInformation(a);
-			const bInfo = ns.gang.getMemberInformation(b);
+			const aInfo = ns.gang.getAscensionResult(a);
+			const bInfo = ns.gang.getAscensionResult(b);
 
-			const aMult = (isHacking) ? aInfo.hack_asc_mult : aInfo.dex_asc_mult;
-			const bMult = (isHacking) ? bInfo.hack_asc_mult : bInfo.dex_asc_mult;
+			// Sometimes ascension result is undefined..
+			// So, Short-Circuit evaluation + optional chaining.
+			const aMult = (isHacking) ? aInfo?.hack || 0 : aInfo?.dex || 0;
+			const bMult = (isHacking) ? bInfo?.hack || 0 : aInfo?.dex || 0;
 
 			return bMult - aMult;
 		});
 
 		for(const mem of members){
 
-			let prepping = `✔️`;
+			let prepping = "✔️";
 			const member_name = Color.set(mem.padStart(longest + 1, " "), Color.preset.lightBlue) ;
 
 			// Member Prepping
@@ -434,7 +472,7 @@ export async function main(ns){
 					const output = `${member_name} ${multi}: ${curMult} ${symbol} ${ascThreshold}  -  ${lbracket}${readyText}${rbracket} ${prepping}`;
 					ns.print(output);
 
-					if(doAsc && memberInfo.respectGain / gangInfo.respect < 0.30){ // Member will only ascend if they account for less than x% of the total respect
+					if(doAsc && memberInfo.respectGain / gangInfo.respect < 0.30 && current_Mult < MAX_ASCENSION_MULTIPLIER){ // Member will only ascend if they account for less than x% of the total respect
 						await ns.sleep(50);
 						ns.gang.ascendMember(mem);
 						membersAscended.push(mem);

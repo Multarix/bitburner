@@ -131,7 +131,12 @@ export async function main(ns){
 
 				const availableAugments = ns.sleeve.getSleevePurchasableAugs(sleeveID);
 				for(const augment of availableAugments){
-					if(ns.getPlayer().money > augment.cost) ns.sleeve.purchaseSleeveAug(sleeveID, augment.name);
+					if(ns.getPlayer().money > augment.cost){
+						const purchased = ns.sleeve.purchaseSleeveAug(sleeveID, augment.name);
+						if(purchased){
+							ns.toast(`🤖 Sleeve-${sleeveID} bought ${augment.name} (💲${ns.formatNumber(augment.cost)})`, "info", 8000);
+						}
+					}
 				}
 			}
 		}
@@ -318,7 +323,7 @@ export async function main(ns){
 		ns.print(sleeveInfo.join("\n"));
 		ns.ui.setTailTitle(`\u200b Managing ${totalSleeves} sleeve${(totalSleeves > 1) ? "s" : ""}`);
 
-		ns.ui.resizeTail(1135, 28 + (22 * totalSleeves));
+		ns.ui.resizeTail(1150, 28 + (22 * totalSleeves));
 		ns.ui.setTailFontSize(14);
 
 		await ns.sleep(100);
