@@ -94,6 +94,9 @@ export async function main(ns){
 	ns.disableLog("ALL");
 	ns.clearLog();
 
+	const numSleeves = ns.sleeve.getNumSleeves();
+	if(!numSleeves) return; // No sleeves
+
 	/** @type {Object<string, SleeveData>} */
 	const sleeves = {};
 

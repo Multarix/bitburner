@@ -90,31 +90,34 @@ export async function main(ns){
 	ns.scriptKill("/managers/targetManager.jsx", "home");
 	ns.scriptKill("/managers/autoBuyer.js", "home");
 
-
 	ns.toast("Starting scripts!", "info", 10000);
 	ns.run("/managers/selfhackManager.js");
 	ns.print(`Selfhack Manager Started`, "info");
 
+	const targetManager = ns.exec("/managers/targetManager.jsx", "home", { threads: 1, preventDuplicates: true });
+	if(homeRAM < 64){ // We have 32GB, kill the target manager in 10 seconds.
+		await ns.sleep(10000);
+		ns.kill(targetManager);
+	};
 
+	ns.exec("/managers/buyServer.js", "home", { threads: 1, preventDuplicates: true });
+	ns.exec("/managers/autoBuyer.js", "home", { threads: 1, preventDuplicates: true }); // Uses singularity.
+
+	if(homeRAM < 128) return; // We have 64GB, don't start any more
+
+	// Kinda hefty to start, ~64GB RAM
+	ns.exec("managers/sleeveManager.js", "home", { threads: 1, preventDuplicates: true });
+	ns.toast("Sleeve manager was started", "info");
+
+	if(homeRAM < 256) return; // We have 128GB, don't start any more
 	if(ns.gang.inGang()){
 		ns.exec("managers/gangManager.js", "home", { threads: 1, preventDuplicates: true });
 		ns.toast("Gang manager was started", "info");
 	}
 
-	if(ns.sleeve.getNumSleeves() > 0){ // Kinda hefty to start, ~64GB RAM
-		ns.exec("managers/sleeveManager.js", "home", { threads: 1, preventDuplicates: true });
-		ns.toast("Sleeve manager was started", "info");
-	}
-
-
-	ns.exec("/managers/targetManager.jsx", "home", { threads: 1, preventDuplicates: true });
-	ns.exec("/managers/buyServer.js", "home", { threads: 1, preventDuplicates: true });
-
-	ns.exec("/managers/autoBuyer.js", "home", { threads: 1, preventDuplicates: true }); // Uses singularity.
 	ns.exec("/managers/factionManager.js", "home", { threads: 1, preventDuplicates: true }); // Uses singularity.
 
-
-	// Even without formulas.exe, we can start the hacknet manager... but only if we pass an arg to the script
+	// Even without formulas.exe, we can start the hacknet manager...But honestly I doubt we care
 	const runHacknetManager = await ns.prompt("Start the Hacknet Manager?", { type: "boolean" });
 	if(runHacknetManager){
 		ns.exec("/managers/hacknetManager.js", "home", { threads: 1, preventDuplicates: true });

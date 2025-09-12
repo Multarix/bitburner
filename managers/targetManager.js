@@ -36,7 +36,6 @@ export async function main(ns){
 	const bestServer = orderedServers[0].name;
 
 	ns.printRaw(<Colors color="lime">Script Starting!</Colors>);
-	await ns.sleep(1000);
 	while(true){
 		await ns.sleep(1000);
 		try {

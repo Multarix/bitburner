@@ -133,7 +133,8 @@ export async function main(ns){
 				const ram = home.maxRam;
 
 				ramFine = ram >= 64000;
-				coresFine = cpuCores >= 4;
+				// coresFine = cpuCores >= 4;
+				coresFine = true;
 
 				if(!ramFine){
 					const cost = ns.singularity.getUpgradeHomeRamCost();
@@ -147,29 +148,30 @@ export async function main(ns){
 						if(upgraded){
 							ns.toast(`Upgraded RAM for $${ns.formatNumber(cost, 3, 1000, true)} ${ns.formatRam(ram)} ➜ ${ns.formatRam(ram * 2)}`, "info", 10000);
 							ns.print(`Upgraded ${Color.set("RAM", Color.preset.yellow)} for ${Color.set("$" + ns.formatNumber(cost, 3, 1000, true), Color.preset.lime)} ${ns.formatRam(ram)} ➜ ${ns.formatRam(ram * 2)}`);
+							ns.print(`Next ${Color.set("RAM", Color.preset.yellow)} upgrade: ${Color.set("$" + ns.formatNumber(ns.singularity.getUpgradeHomeRamCost(), 3, 1000, true), Color.preset.red)} ${ns.formatRam(ram * 2)} ➜ ${ns.formatRam(ram * 4)}`);
 						}
 
 						returnToCurrentWork(ns, city, currentTask);
 					}
 				}
 
-				if(!coresFine){
-					const cost = ns.singularity.getUpgradeHomeCoresCost();
-					// If we can afford it...
-					if(ns.getPlayer().money > cost * 1.1){
-					// Move player if not in a city that can buy it
-						if(!buyLocation[ns.getPlayer().city]) ns.singularity.travelToCity(cityNames.Sector12);
-						ns.singularity.goToLocation(buyLocation[ns.getPlayer().city]);
-						const upgraded = ns.singularity.upgradeHomeCores();
+				// if(!coresFine){
+				// 	const cost = ns.singularity.getUpgradeHomeCoresCost();
+				// 	// If we can afford it...
+				// 	if(ns.getPlayer().money > cost * 1.1){
+				// 	// Move player if not in a city that can buy it
+				// 		if(!buyLocation[ns.getPlayer().city]) ns.singularity.travelToCity(cityNames.Sector12);
+				// 		ns.singularity.goToLocation(buyLocation[ns.getPlayer().city]);
+				// 		const upgraded = ns.singularity.upgradeHomeCores();
 
-						if(upgraded){
-							ns.toast(`Upgraded CPU Cores for $${ns.formatNumber(cost, 3, 1000, true)} ${cpuCores} ➜ ${cpuCores + 1}`, "info", 10000);
-							ns.print(`Upgraded ${Color.set("CPU Cores", Color.preset.yellow)} for ${Color.set("$" + ns.formatNumber(cost, 3, 1000, true), Color.preset.lime)} ${cpuCores} ➜ ${cpuCores + 1}`);
-						}
+				// 		if(upgraded){
+				// 			ns.toast(`Upgraded CPU Cores for $${ns.formatNumber(cost, 3, 1000, true)} ${cpuCores} ➜ ${cpuCores + 1}`, "info", 10000);
+				// 			ns.print(`Upgraded ${Color.set("CPU Cores", Color.preset.yellow)} for ${Color.set("$" + ns.formatNumber(cost, 3, 1000, true), Color.preset.lime)} ${cpuCores} ➜ ${cpuCores + 1}`);
+				// 		}
 
-						returnToCurrentWork(ns, city, currentTask);
-					}
-				}
+				// 		returnToCurrentWork(ns, city, currentTask);
+				// 	}
+				// }
 
 
 			} catch {
