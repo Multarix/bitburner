@@ -154,7 +154,7 @@ export function gainRoot(ns, target){
 		}
 
 		// if(nuked) if(ns.fileExists()) ns.installBackdoor()
-		ns.toast(`Opened ${ports} ports ${(nuked) ? "and successfully gained root access " : ""}on ${target}`, "success", 10000);
+		// ns.toast(`Opened ${ports} ports ${(nuked) ? "and successfully gained root access " : ""}on ${target}`, "success", 10000);
 	}
 }
 

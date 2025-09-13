@@ -105,7 +105,11 @@ export async function main(ns){
 
 	ns.ui.setTailTitle(<Colors color="white">Server Manager | Starting</Colors>);
 	ns.printRaw(<Colors color="lime">Script Starting!</Colors>);
-	await ns.sleep(2000);
+
+	while(!ns.peek(1)){
+		ns.writePort(2, true);
+		await ns.sleep(1000);
+	}
 
 	let lastTarget = ns.args[0];
 	while(true){

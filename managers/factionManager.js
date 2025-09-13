@@ -20,7 +20,8 @@ function allCombatisAbove(player, requirement){
  * @param {NS} ns
  * @param {import("NetscriptDefinitions").FactionName} factionName
  */
-function joinFaction(ns, factionName){
+async function joinFaction(ns, factionName){
+	await ns.sleep(5000);
 	const invitations = ns.singularity.checkFactionInvitations();
 	if(invitations.includes(factionName)){
 		// ns.print(`Attempting to join ${Color.set(factionName, Color.preset.yellow)}...`);
@@ -50,27 +51,29 @@ export async function main(ns){
 	const cities = ns.enums.CityName;
 	const acceptedFactions = ns.getPlayer().factions;
 
-	// Misc
-	// factionsJoined[factions.Netburners] = acceptedFactions.includes(factions.Netburners);
-	factionsJoined[factions.TianDiHui] = acceptedFactions.includes(factions.TianDiHui);
-
-	// LateGame
-	factionsJoined[factions.TheCovenant] = acceptedFactions.includes(factions.TheCovenant);
-	factionsJoined[factions.Illuminati] = acceptedFactions.includes(factions.Illuminati);
-	factionsJoined[factions.Daedalus] = acceptedFactions.includes(factions.Daedalus);
-
-	// Criminal
-	factionsJoined[factions.SlumSnakes] = acceptedFactions.includes(factions.SlumSnakes);
-	factionsJoined[factions.Tetrads] = acceptedFactions.includes(factions.Tetrads);
-	factionsJoined[factions.Silhouette] = acceptedFactions.includes(factions.Silhouette);
-	factionsJoined[factions.SpeakersForTheDead] = acceptedFactions.includes(factions.SpeakersForTheDead);
-	factionsJoined[factions.TheDarkArmy] = acceptedFactions.includes(factions.TheDarkArmy);
-	factionsJoined[factions.TheSyndicate] = acceptedFactions.includes(factions.TheSyndicate);
-
 	try {
 		const totalAugmentsInstalled = ns.singularity.getOwnedAugmentations(false).length;
 		let allJoined = false;
 		while(!allJoined){
+			// Misc
+			// factionsJoined[factions.Netburners] = acceptedFactions.includes(factions.Netburners);
+			factionsJoined[factions.TianDiHui] = acceptedFactions.includes(factions.TianDiHui);
+
+			// LateGame
+			factionsJoined[factions.TheCovenant] = acceptedFactions.includes(factions.TheCovenant);
+			factionsJoined[factions.Illuminati] = acceptedFactions.includes(factions.Illuminati);
+			factionsJoined[factions.Daedalus] = acceptedFactions.includes(factions.Daedalus);
+
+			// Criminal
+			factionsJoined[factions.SlumSnakes] = acceptedFactions.includes(factions.SlumSnakes);
+			factionsJoined[factions.Tetrads] = acceptedFactions.includes(factions.Tetrads);
+			factionsJoined[factions.Silhouette] = acceptedFactions.includes(factions.Silhouette);
+			factionsJoined[factions.SpeakersForTheDead] = acceptedFactions.includes(factions.SpeakersForTheDead);
+			factionsJoined[factions.TheDarkArmy] = acceptedFactions.includes(factions.TheDarkArmy);
+			factionsJoined[factions.TheSyndicate] = acceptedFactions.includes(factions.TheSyndicate);
+
+
+
 			await ns.sleep(1000);
 
 			const player = ns.getPlayer();
@@ -97,7 +100,7 @@ export async function main(ns){
 				const goodKarma = karma < -9;
 
 				if(goodCombat && goodMoney && goodKarma){
-					const joined = joinFaction(ns, thisFaction);
+					const joined = await joinFaction(ns, thisFaction);
 					if(joined) continue;
 				}
 			}
@@ -112,7 +115,7 @@ export async function main(ns){
 
 				if(goodCombat && goodKarma){
 					if(![cities.Chongqing, cities.NewTokyo, cities.Ishima].includes(city)) ns.singularity.travelToCity(cities.Chongqing);
-					const joined = joinFaction(ns, thisFaction);
+					const joined = await joinFaction(ns, thisFaction);
 					if(joined) continue;
 				}
 			}
@@ -142,7 +145,7 @@ export async function main(ns){
 				const goodKarma = karma < -45;
 
 				if(goodHacking && goodCombat && goodKills && goodKarma){
-					const joined = joinFaction(ns, thisFaction);
+					const joined = await joinFaction(ns, thisFaction);
 					if(joined) continue;
 				}
 			}
@@ -160,7 +163,7 @@ export async function main(ns){
 
 				if(goodHacking && goodCombat && goodMoney && goodKills && goodKarma){
 					if(city !== cities.Chongqing) ns.singularity.travelToCity(cities.Chongqing);
-					const joined = joinFaction(ns, thisFaction);
+					const joined = await joinFaction(ns, thisFaction);
 					if(joined) continue;
 				}
 			}
@@ -177,7 +180,7 @@ export async function main(ns){
 
 				if(goodHacking && goodCombat && goodMoney && goodKarma){
 					if(![cities.Aevum, cities.Sector12].includes(city)) ns.singularity.travelToCity(cities.Sector12);
-					const joined = joinFaction(ns, thisFaction);
+					const joined = await joinFaction(ns, thisFaction);
 					if(joined) continue;
 				}
 			}
@@ -200,7 +203,7 @@ export async function main(ns){
 				const goodMoney = money > 75000000000;
 
 				if(goodAugments && goodHacking && goodCombat && goodMoney){
-					const joined = joinFaction(ns, thisFaction);
+					const joined = await joinFaction(ns, thisFaction);
 					if(joined) continue;
 				}
 			}
@@ -216,7 +219,7 @@ export async function main(ns){
 				const goodMoney = money > 150000000000;
 
 				if(goodAugments && goodHacking && goodCombat && goodMoney){
-					const joined = joinFaction(ns, thisFaction);
+					const joined = await joinFaction(ns, thisFaction);
 					if(joined) continue;
 				}
 			}
@@ -232,7 +235,7 @@ export async function main(ns){
 				const goodMoney = money > 100000000000;
 
 				if(goodAugments && (goodHacking || goodCombat) && goodMoney){
-					const joined = joinFaction(ns, thisFaction);
+					const joined = await joinFaction(ns, thisFaction);
 					if(joined) continue;
 				}
 			}
@@ -253,7 +256,7 @@ export async function main(ns){
 
 				if(goodHacking && goodMoney){
 					if(![cities.Chongqing, cities.NewTokyo, cities.Ishima].includes(city)) ns.singularity.travelToCity(cities.NewTokyo);
-					const joined = joinFaction(ns, thisFaction);
+					const joined = await joinFaction(ns, thisFaction);
 					if(joined) continue;
 				}
 			}

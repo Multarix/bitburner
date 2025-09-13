@@ -46,6 +46,7 @@ export async function main(ns){
 	ns.disableLog("ALL");
 	ns.clearLog();
 	ns.ui.setTheme(theme);
+	ns.writePort(1, false);
 
 	const allNetworks = scanNetworks(ns, "home", true);
 
@@ -66,6 +67,9 @@ export async function main(ns){
 			ns.run("/helpers/startHelper.js", 1, false);
 			await ns.sleep(1000);
 		}
+
+		ns.run("/helpers/startHelper2.js", 1);
+		await ns.sleep(1000);
 
 		gainRoot(ns, "foodnstuff");
 		await ns.sleep(1000);
@@ -95,18 +99,19 @@ export async function main(ns){
 	ns.print(`Selfhack Manager Started`, "info");
 
 	const targetManager = ns.exec("/managers/targetManager.jsx", "home", { threads: 1, preventDuplicates: true });
-	if(homeRAM < 64){ // We have 32GB, kill the target manager in 10 seconds.
-		await ns.sleep(10000);
+	if(homeRAM < 64){ // We have 32GB
+		while(!ns.peek(2)){
+			await ns.sleep(1000);
+		}
 		ns.kill(targetManager);
 	};
 
 	ns.exec("/managers/buyServer.js", "home", { threads: 1, preventDuplicates: true });
-	ns.exec("/managers/autoBuyer.js", "home", { threads: 1, preventDuplicates: true }); // Uses singularity.
+	ns.exec("/managers/autoBuyer.js", "home", { threads: 1, preventDuplicates: true }); // ~38GB
 
-	if(homeRAM < 128) return; // We have 64GB, don't start any more
+	if(homeRAM < 128) return; // We have 64GB or less, don't start any more
 
-	// Kinda hefty to start, ~64GB RAM
-	ns.exec("managers/sleeveManager.js", "home", { threads: 1, preventDuplicates: true });
+	ns.exec("managers/sleeveManager.js", "home", { threads: 1, preventDuplicates: true }); // ~64GB RAM
 	ns.toast("Sleeve manager was started", "info");
 
 	if(homeRAM < 256) return; // We have 128GB, don't start any more
@@ -115,7 +120,7 @@ export async function main(ns){
 		ns.toast("Gang manager was started", "info");
 	}
 
-	ns.exec("/managers/factionManager.js", "home", { threads: 1, preventDuplicates: true }); // Uses singularity.
+	ns.exec("/managers/factionManager.js", "home", { threads: 1, preventDuplicates: true }); // ~12GB
 
 	// Even without formulas.exe, we can start the hacknet manager...But honestly I doubt we care
 	const runHacknetManager = await ns.prompt("Start the Hacknet Manager?", { type: "boolean" });
