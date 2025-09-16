@@ -101,45 +101,47 @@ function serverInfo(ns, nextUpgrade){
 
 	if(nextUpgrade.node !== -1){
 		try {
+			const isReady = (nextUpgrade.cost <= ns.getPlayer().money) ? "✔️" : "❌";
+			const moneyColor = (nextUpgrade.cost <= ns.getPlayer().money) ? Color.preset.lightGreen : Color.preset.lightRed;
 			const serverName = Color.set(`Server-${nextUpgrade.node.toString().padStart(maxNodes.toString().length, "0")}`, Color.preset.lightBlue);
-			const cost = Color.set("$" + ns.formatNumber(nextUpgrade.cost), Color.preset.lightRed);
+			const cost = Color.set("$" + ns.formatNumber(nextUpgrade.cost), moneyColor);
 			switch(nextUpgrade?.type){
 				case "cores": {
 					const nodeInfo = ns.hacknet.getNodeStats(nextUpgrade.node);
 					const currentCores = nodeInfo.cores;
 					const nextCores = nodeInfo.cores + 1;
 
-					nextUpgradeText = ` ${serverName} - Cores ${Color.set(currentCores, Color.preset.lightPurple)} ➜ ${Color.set(nextCores, Color.preset.orange)} (${cost})`;
+					nextUpgradeText = ` ${serverName} - Cores ${Color.set(currentCores, Color.preset.lightPurple)} ➜ ${Color.set(nextCores, Color.preset.orange)} (${cost}) ${isReady}`;
 					break;
 				}
 
 				case "level": {
-					const nodeInfo = ns.hacknet.getNodeStats(nextUpgrade.index);
+					const nodeInfo = ns.hacknet.getNodeStats(nextUpgrade.node);
 					const currentLevel = nodeInfo.level;
 					const nextLevel = Math.min(nodeInfo.level + 10, MAX_LEVEL);
 
-					nextUpgradeText = ` ${serverName} - Level ${Color.set(currentLevel, Color.preset.lightPurple)} ➜ ${Color.set(nextLevel, Color.preset.orange)} (${cost})`;
+					nextUpgradeText = ` ${serverName} - Level ${Color.set(currentLevel, Color.preset.lightPurple)} ➜ ${Color.set(nextLevel, Color.preset.orange)} (${cost}) ${isReady}`;
 					break;
 				}
 
 				case "ram": {
-					const nodeInfo = ns.hacknet.getNodeStats(nextUpgrade.index);
+					const nodeInfo = ns.hacknet.getNodeStats(nextUpgrade.node);
 					const currentRAM = ns.formatRam(nodeInfo.ram, 0);
 					const nextRAM = ns.formatRam(nodeInfo.ram * 2, 0);
-					nextUpgradeText = ` ${serverName} - RAM ${Color.set(currentRAM, Color.preset.lightPurple)} ➜ ${Color.set(nextRAM, Color.preset.orange)} (${cost})`;
+					nextUpgradeText = ` ${serverName} - RAM ${Color.set(currentRAM, Color.preset.lightPurple)} ➜ ${Color.set(nextRAM, Color.preset.orange)} (${cost}) ${isReady}`;
 					break;
 				}
 
 				case "cache": {
-					const nodeInfo = ns.hacknet.getNodeStats(nextUpgrade.index);
+					const nodeInfo = ns.hacknet.getNodeStats(nextUpgrade.node);
 					const currentCache = ns.formatNumber(nodeInfo.hashCapacity, 0);
 					const nextCache = ns.formatNumber(nodeInfo.hashCapacity * 2, 0);
-					nextUpgradeText = ` ${serverName} - RAM ${Color.set(currentCache, Color.preset.lightPurple)} ➜ ${Color.set(nextCache, Color.preset.orange)} (${cost})`;
+					nextUpgradeText = ` ${serverName} - RAM ${Color.set(currentCache, Color.preset.lightPurple)} ➜ ${Color.set(nextCache, Color.preset.orange)} (${cost}) ${isReady}`;
 					break;
 				}
 
 				case "server": {
-					nextUpgradeText = ` ${serverName} - Buying (${cost})`;
+					nextUpgradeText = ` Buying ${serverName} (${cost}) ${isReady}`;
 					break;
 				}
 
