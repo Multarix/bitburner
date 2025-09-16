@@ -8,12 +8,11 @@ export async function main(ns){
 
 	ns.print(Color.set("Starting Script!", Color.preset.lightGreen));
 
-
-
 	try {
 		while(!ns.hasTorRouter()){
 			if(ns.getPlayer().money > 200000){
-				ns.singularity.purchaseTor();
+				const bought = ns.singularity.purchaseTor();
+				if(bought) ns.toast("Purchased TOR Router", "info", 10000);
 			}
 
 			await ns.sleep(10000);
@@ -24,31 +23,38 @@ export async function main(ns){
 		let hasAllPrograms = false;
 		let ramFine = false;
 		while((!hasAllPrograms || !ramFine)){
+			await ns.sleep(1000);
 			try {
-				const city = ns.getPlayer().city;
-				const currentTask = ns.singularity.getCurrentWork();
-
 				if(!hasAllPrograms){
-					ns.run("/helpers/programBuyer.js", { threads: 1, preventDuplicates: true }, city, currentTask);
+					const pid = ns.run("/helpers/programBuyer.js", { threads: 1, preventDuplicates: true });
+					if(!pid){
+						ns.print(Color.set("Failed to run programBuyer, not enough free RAM!", Color.preset.red));
+						continue;
+					}
 
 					await ns.nextPortWrite(4); // We'll know the programBuyer has pre much finished at this point
-					hasAllPrograms = ns.readPort(4);
 					await ns.sleep(100); // lil extra to make sure the ram got freed up
+					hasAllPrograms = ns.readPort(4);
 				}
 
 
 				if(!ramFine){
-					ns.run("/helpers/ramBuyer.js", { threads: 1, preventDuplicates: true }, currentTask);
+					const pid = ns.run("/helpers/ramBuyer.js", { threads: 1, preventDuplicates: true });
+					if(!pid){
+						ns.print(Color.set("Failed to run ramBuyer, not enough free RAM!", Color.preset.red));
+						continue;
+					}
 
 					await ns.nextPortWrite(4); // We'll know the programBuyer has pre much finished at this point
-					ramFine = ns.readPort(4);
 					await ns.sleep(100); // lil extra to make sure the ram got freed up
+
+					ramFine = ns.readPort(4);
 				}
 
-			} catch {
+			} catch (e){
+				ns.print(e);
 				continue;
 			}
-			await ns.sleep(10000);
 		}
 
 	} catch (e){

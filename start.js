@@ -96,7 +96,7 @@ export async function main(ns){
 
 	ns.toast("Starting scripts!", "info", 10000);
 	ns.run("/managers/selfhackManager.js");
-	ns.print(`Selfhack Manager Started`, "info");
+	ns.toast(`Selfhack Manager Started`, "info", 10000);
 
 	const targetManager = ns.exec("/managers/targetManager.jsx", "home", { threads: 1, preventDuplicates: true });
 	if(homeRAM < 64){ // We have 32GB
@@ -125,7 +125,7 @@ export async function main(ns){
 	// Even without formulas.exe, we can start the hacknet manager...But honestly I doubt we care
 	const runHacknetManager = await ns.prompt("Start the Hacknet Manager?", { type: "boolean" });
 	if(runHacknetManager){
-		ns.exec("/managers/hacknetManager.js", "home", { threads: 1, preventDuplicates: true });
+		ns.exec("/managers/hacknetServerManager.js", "home", { threads: 1, preventDuplicates: true });
 		ns.toast("Hacknet manager was started", "info");
 	}
 

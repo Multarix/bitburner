@@ -28,7 +28,7 @@ function calculateMoneyGainRate(level, ram, cores, mult){
 /**
  * @param {NS} ns
  * @param {String} type Should be `core`, `ram` or `level`
- * @param {HackNet} obj  An object that should contain the keys `cores`, `ram` and `level`
+ * @param {HackNet} obj An object that should contain the keys `cores`, `ram` and `level`
  **/
 const nodeProduction = (ns, type, obj) => {
 	if(type === "core") obj.cores += 1;
@@ -76,14 +76,14 @@ export async function main(ns){
 
 			let i;
 			hackNodesMaxed = true;
-			for(i = 0; ns.hacknet.numNodes() > i; i++){
+			for(i = 0; i < ns.hacknet.numNodes(); i++){
 				const nodeStats = ns.hacknet.getNodeStats(i);
 				if(!nodeStats){
 					ns.print(yellow(`[WARN] Node ${i} doesn't exist!`));
 					continue;
 				}
 
-				if(nodeStats.level === 200 && nodeStats.core === 16 && nodeStats.ram === 64) continue; // The node is maxed out
+				if(nodeStats.level === 200 && nodeStats.cores === 16 && nodeStats.ram === 64) continue; // The node is maxed out
 				if(hackNodesMaxed) hackNodesMaxed = false;
 				const nodeEdited = Object.assign({}, nodeStats);
 
@@ -159,7 +159,7 @@ export async function main(ns){
 				ns.print(buyMessage);
 			}
 
-			const sleepTime = (bought) ? 10 : 10000;
+			const sleepTime = (bought) ? 50 : 10000;
 			await ns.sleep(sleepTime);
 		}
 	}

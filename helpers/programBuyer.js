@@ -5,11 +5,10 @@ export async function main(ns){
 	ns.disableLog("ALL");
 	ns.clearLog();
 
+	// ns.ui.openTail();
+
 	let hasAllPrograms = true;
 	try {
-		const city = ns.args[0];
-		const currentTask = ns.args[1];
-
 		const programs = {
 			"BruteSSH.exe": ns.fileExists("BruteSSH.exe"),
 			"FTPCrack.exe": ns.fileExists("FTPCrack.exe"),
@@ -18,10 +17,8 @@ export async function main(ns){
 			"SQLInject.exe": ns.fileExists("SQLInject.exe")
 		};
 
-
 		for(const item in programs){
-		// ns.print(item, " -> ", programs[item]);
-
+			// ns.print(item, " -> ", programs[item]);
 			if(!programs[item]){
 				hasAllPrograms = false;
 				// ns.print(`Attempting to buy ${Color.set(item, Color.preset.yellow)}...`);
@@ -34,14 +31,15 @@ export async function main(ns){
 						ns.toast(`Bought '${item}' for $${ns.formatNumber(cost, 3, 1000, true)}`, "info", 10000);
 						ns.print(`Bought ${Color.set(item, Color.preset.yellow)} for ${Color.set("$" + ns.formatNumber(cost, 3, 1000, true), Color.preset.lime)}`);
 					}
-					ns.run("/helpers/returnToWork.js", { threads: 1, preventDuplicates: true }, city, currentTask);
 					await ns.sleep(1000);
 				}
 			}
 		}
+
 	} catch (e){
-		null;
+		hasAllPrograms = false;
 	}
 
+	// ns.print(hasAllPrograms);
 	ns.writePort(4, hasAllPrograms);
 }

@@ -414,7 +414,7 @@ export async function main(ns){
 		const multLength = Math.round(highestMult).toString().length;
 
 		ns.print("\n");
-		ns.print(" 👑 Ascension, sorted by cloest to ascending:");
+		ns.print(" 👑 Ascension, sorted by ascension:");
 
 		const lbracket = Color.set("[", Color.preset.lightGray);
 		const rbracket = Color.set("]", Color.preset.lightGray);
@@ -426,7 +426,7 @@ export async function main(ns){
 			// Sometimes ascension result is undefined..
 			// So, Short-Circuit evaluation + optional chaining.
 			const aMult = (isHacking) ? aInfo?.hack || 0 : aInfo?.dex || 0;
-			const bMult = (isHacking) ? bInfo?.hack || 0 : aInfo?.dex || 0;
+			const bMult = (isHacking) ? bInfo?.hack || 0 : bInfo?.dex || 0;
 
 			return bMult - aMult;
 		});

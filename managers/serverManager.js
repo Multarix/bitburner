@@ -1,7 +1,7 @@
 import { gainRoot, timeConvert, serverSort } from "/helpers/Functions.js";
 import { Timer } from "jsx/Timer.jsx";
 import { Colors } from "jsx/Colors.jsx";
-import { numberConvert } from "helpers/Functions";
+import { Color, numberConvert } from "helpers/Functions";
 
 const margin = 2000;
 
@@ -81,7 +81,7 @@ async function threadManager(ns, type, target){
 		}
 	}
 
-	if(requiredThreads > 0) ns.printRaw(<Colors color="yellow">Missing {requiredThreads} for {type} on {target}!</Colors>);
+	if(requiredThreads > 0) ns.printRaw(<Colors color="yellow"> Missing {requiredThreads} for {type} on {target}!</Colors>);
 }
 
 
@@ -106,15 +106,20 @@ export async function main(ns){
 	ns.ui.setTailTitle(<Colors color="white">Server Manager | Starting</Colors>);
 	ns.printRaw(<Colors color="lime">Script Starting!</Colors>);
 
+	let count = 0;
 	while(!ns.peek(1)){
 		ns.writePort(2, true);
+		count += 1;
 		await ns.sleep(1000);
+
+		if(count > 15) break; // Something has clearly gone wrong
 	}
 
 	let lastTarget = ns.args[0];
 	while(true){
 		let setupTarget = ns.peek(20);
 		if(setupTarget === "NULL PORT DATA"){
+			ns.print(Color.set(` Error: No Port Data, setting to ${lastTarget}`, Color.preset.red));
 			setupTarget = lastTarget;
 			ns.writePort(20, setupTarget);
 		};

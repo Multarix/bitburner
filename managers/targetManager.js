@@ -53,6 +53,7 @@ export async function main(ns){
 
 				if(allNetworks[server].name === "home") continue;
 				if(allNetworks[server].name.startsWith("hack-")) continue;
+				if(allNetworks[server].name.startsWith("hacknet-server")) continue;
 				if(allNetworks[server].name === target.name) continue;
 				if(allNetworks[server].name === target.prev) continue;
 				if(allNetworks[server].ports > maxPorts) continue;
@@ -84,7 +85,7 @@ export async function main(ns){
 				ns.printRaw(<Colors color="white"> Starting Server Manager...</Colors>);
 				serverManagerID = ns.run("/managers/serverManager.jsx", 1, target.name);
 
-				ns.run("/managers/goManager.js", { threads: 1, preventDuplicates: true }); // This uses a bunch of RAM for not much gain, so we start it after literally everything else could be.
+				// ns.run("/managers/goManager.js", { threads: 1, preventDuplicates: true }); // This uses a bunch of RAM for not much gain, so we start it after literally everything else could be.
 			}
 
 			if(target.name === bestServer){

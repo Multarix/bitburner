@@ -17,8 +17,8 @@ export async function main(ns){
 	ns.clearLog();
 
 	/** @type {import("NetscriptDefinitions").Task} task */
-	const task = ns.args[0];
 	const city = ns.args[0];
+	const task = ns.singularity.getCurrentWork();
 
 	switch(task.type){
 		case "CLASS": {
