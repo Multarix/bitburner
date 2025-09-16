@@ -33,11 +33,10 @@ import { Color } from "helpers/Functions";
  * ]
  *```
 **/
-
-function serverInfo(ns, nextUpgrade){
+function serverInfo(ns, nextUpgrade, hashSpending){
 	const MAX_LEVEL = ns.formulas.hacknetServers.constants().MaxLevel;
-	const currentHashes = ns.formatNumber(ns.hacknet.numHashes());
-	const hashCapacity = ns.formatNumber(ns.hacknet.hashCapacity());
+	const currentHashes = ns.formatNumber(ns.hacknet.numHashes(), 0);
+	const hashCapacity = ns.formatNumber(ns.hacknet.hashCapacity(), 0);
 
 	const numberNodes = ns.hacknet.numNodes();
 	const maxNodes = ns.hacknet.maxNumNodes();
@@ -92,13 +91,15 @@ function serverInfo(ns, nextUpgrade){
 	output.push(` Current Funds:     ${Color.set("$" + ns.formatNumber(ns.getPlayer().money), Color.preset.lime)}`);
 	output.push(` Est. Income/sec:   ${income}`);
 	output.push(` Hash Rate:         ${Color.set(hashGainRate.toFixed(3) + " H/s", Color.preset.pink)}`);
-	output.push(` Hash Stored:       ${Color.set(currentHashes, Color.preset.lightYellow)} / ${Color.set(hashCapacity, Color.preset.green)}`);
+	output.push(` Hash Stored:       ${Color.set(currentHashes, Color.preset.lightPink)} / ${Color.set(hashCapacity, Color.preset.green)}`);
 	output.push(` Nodes Purchased:   ${Color.set(numberNodes, Color.preset.lightYellow)}/${Color.set(maxNodes, Color.preset.green)}`);
 	output.push(" ");
-	output.push(" Next Upgrade:");
+	output.push(" Next Hash Upgrade:");
+	output.push(hashSpending);
+	output.push(" ");
+	output.push(" Next Server Upgrade:");
 
 	let nextUpgradeText = " N/A";
-
 	if(nextUpgrade.node !== -1){
 		try {
 			const isReady = (nextUpgrade.cost <= ns.getPlayer().money) ? "✔️" : "❌";
@@ -202,38 +203,47 @@ const findBest = (obj) => { // Smaller is better
 	return best;
 };
 
+
+
 /**
  * @param {NS} ns
  * @param {string} target
  **/
-function spendHashes(ns, target){
-	// const target = biggestTarget()
+function spendHashes(ns, target, improveStudy = false){
+	const HASH_COLOR = Color.preset.lightPink;
+	const UPGRADE_COLOR = Color.preset.yellow;
 
-	// We know who we targeting...
-	if(1 < ns.getServerMinSecurityLevel(target)){
-		const weakenCost = ns.hacknet.hashCost("Reduce Minimum Security", 1);
-		if(weakenCost < ns.hacknet.numHashes()){
-			const spent = ns.hacknet.spendHashes("Reduce Minimum Security", "ecorp", 1);
-			if(spent) ns.print(` Spent ${Color.set(weakenCost, Color.preset.lightBlue)} hashes to weaken ${Color.set(target, Color.preset.yellow)}`);
+	if(improveStudy){
+		const cost = ns.hacknet.hashCost("Improve Studying", 1);
+		if(cost < ns.hacknet.numHashes()){
+			ns.hacknet.spendHashes("Improve Studying", target, 1);
 		}
+
+		return `${Color.set("Improve Studying", UPGRADE_COLOR)} - ${Color.set(ns.formatNumber(cost, 0) + " Hash", HASH_COLOR)}`;
 	}
 
 	if(ns.getServerMaxMoney(target) < 10000000000000){ // Should be 10 tril?
-		const growCost = ns.hacknet.hashCost("Increase Maximum Money", 1);
-		if(growCost < ns.hacknet.numHashes()){
-			const spent = ns.hacknet.spendHashes("Increase Maximum Money", "ecorp", 1);
-			if(spent) ns.print(` Spent ${Color.set(growCost, Color.preset.lightBlue)} hashes to grow ${Color.set(target, Color.preset.yellow)}`);
+		const cost = ns.hacknet.hashCost("Increase Maximum Money", 1);
+		if(cost < ns.hacknet.numHashes()){
+			ns.hacknet.spendHashes("Increase Maximum Money", target, 1);
 		}
 
-		return;
+		return `${Color.set("Increase Maximum Money", UPGRADE_COLOR)} - ${Color.set(ns.formatNumber(cost, 0) + " Hash", HASH_COLOR)}`;
 	}
 
-	const studyCost = ns.hacknet.hashCost("Improve Studying", 1);
-	if(studyCost < ns.hacknet.numHashes()){
-		const spent = ns.hacknet.spendHashes("Improve Studying", target, 1);
-		if(spent) ns.print(` Spent ${Color.set(studyCost, Color.preset.lightBlue)} hashes to improve ${Color.set("studying", Color.preset.yellow)}`);
+	// We know who we targeting...
+	if(1 < ns.getServerMinSecurityLevel(target)){
+		const cost = ns.hacknet.hashCost("Reduce Minimum Security", 1);
+		if(cost < ns.hacknet.numHashes()){
+			ns.hacknet.spendHashes("Reduce Minimum Security", target, 1);
+		}
+
+		return `${Color.set("Reduce Minimum Security", UPGRADE_COLOR)} - ${Color.set(ns.formatNumber(cost, 0) + " Hash", HASH_COLOR)}`;
 	}
+
+	return Color.set("N/A", UPGRADE_COLOR);
 }
+
 
 
 /** @param {NS} ns **/
@@ -243,7 +253,7 @@ export async function main(ns){
 	ns.print(Color.set(" Script Started", Color.preset.lime));
 	ns.ui.openTail();
 
-	const BASE_HASH_PRODUCTION = 0.0013; // Hashes = money, more hashes = more money...
+	// const BASE_HASH_PRODUCTION = 0.0013; // Hashes = money, more hashes = more money...
 	// Max Level is 300
 	const MAX_LEVEL = ns.formulas.hacknetServers.constants().MaxLevel;
 	// Max RAM is 8192
@@ -259,8 +269,6 @@ export async function main(ns){
 	for(const server in allNetworks) serversArray.push({ name: allNetworks[server].name, money: allNetworks[server].maxMoney });
 	const orderedServers = serversArray.sort((a, b) => b.money - a.money);
 	const bestServer = orderedServers[0].name;
-
-	const spend = spendHashes.bind(null, ns, bestServer);
 
 	let serversMaxed = false;
 	// const announced = false;
@@ -335,7 +343,9 @@ export async function main(ns){
 		serversMaxed = (toUpgrade.node === -1); // If no upgrades or server can be bought, clearly they're maxed... right? Hopefully?
 		if(serversMaxed) break;
 
-		const toPrint = serverInfo(ns, toUpgrade);
+		const hashSpending = spendHashes(ns, "", true);
+
+		const toPrint = serverInfo(ns, toUpgrade, " " + hashSpending);
 		ns.clearLog();
 		for(const line of toPrint){
 			ns.print(line);
@@ -343,6 +353,7 @@ export async function main(ns){
 
 		ns.ui.setTailFontSize(14);
 		ns.ui.resizeTail(680, 20 + (22 * toPrint.length));
+
 
 		const money = ns.getPlayer().money;
 		let boughtUpgrade = false;
@@ -370,7 +381,7 @@ export async function main(ns){
 			}
 		}
 
-		await ns.sleep(1000);
+		await ns.sleep(2000);
 	}
 
 	let cachesMaxed = false;
@@ -395,7 +406,8 @@ export async function main(ns){
 		if(toUpgrade.node !== -1) cachesMaxed = false;
 		if(cachesMaxed) break;
 
-		const toPrint = serverInfo(ns, toUpgrade);
+		const hashSpending = spendHashes(ns, bestServer);
+		const toPrint = serverInfo(ns, toUpgrade, " " + hashSpending);
 		ns.clearLog();
 		for(const line of toPrint){
 			ns.print(line);
@@ -405,6 +417,8 @@ export async function main(ns){
 		ns.ui.resizeTail(680, 20 + (22 * toPrint.length));
 
 		if(toUpgrade.cost < ns.getPlayer().money) ns.hacknet.upgradeCache(toUpgrade.node, 1);
+
+		await ns.sleep(2000);
 	}
 
 	ns.print(Color.set("Hacknet Servers Maxed!", Color.preset.pink));
@@ -412,14 +426,16 @@ export async function main(ns){
 	ns.ui.setTailTitle("\u200b Hacknet Manager - Spending");
 
 	while(true){
-		spend();
-
-		const toPrint = serverInfo(ns);
+		const hashSpending = spendHashes(ns, bestServer);
+		const toPrint = serverInfo(ns, null, { node: -1 } + hashSpending);
 		ns.clearLog();
 		for(const line of toPrint){
 			ns.print(line);
 		}
 
-		await ns.sleep(100);
+		ns.ui.setTailFontSize(14);
+		ns.ui.resizeTail(680, 20 + (22 * toPrint.length));
+
+		await ns.sleep(2000);
 	}
 }

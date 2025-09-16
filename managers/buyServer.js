@@ -74,6 +74,7 @@ export async function main(ns){
 
 	// Buy servers
 	const serverLimit = ns.getPurchasedServerLimit();
+	if(!serverLimit) return ns.spawn("/managers/hacknetServerManager.js", { threads: 1, preventDuplicates: true, spawnDelay: 500 }); // Can't buy regular servers...
 	ns.toast(`Purchased Servers: ${ns.getPurchasedServers().length}/${serverLimit}`, "info", 5000);
 	while(ns.getPurchasedServers().length < serverLimit){
 		const serversBought = ns.getPurchasedServers().length;

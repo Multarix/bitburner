@@ -123,11 +123,11 @@ export async function main(ns){
 	ns.exec("/managers/factionManager.js", "home", { threads: 1, preventDuplicates: true }); // ~12GB
 
 	// Even without formulas.exe, we can start the hacknet manager...But honestly I doubt we care
-	const runHacknetManager = await ns.prompt("Start the Hacknet Manager?", { type: "boolean" });
-	if(runHacknetManager){
-		ns.exec("/managers/hacknetServerManager.js", "home", { threads: 1, preventDuplicates: true });
-		ns.toast("Hacknet manager was started", "info");
-	}
+	// const runHacknetManager = await ns.prompt("Start the Hacknet Manager?", { type: "boolean" });
+	// if(runHacknetManager){
+	// 	ns.exec("/managers/hacknetServerManager.js", "home", { threads: 1, preventDuplicates: true });
+	// 	ns.toast("Hacknet manager was started", "info");
+	// }
 
 
 	if(ns.stock.hasWSEAccount() && ns.stock.hasTIXAPIAccess() && ns.stock.has4SDataTIXAPI()){
