@@ -9,10 +9,10 @@ const factionsJoined = {};
  * @return {boolean}
  */
 function allCombatisAbove(player, requirement){
-	if(player.strength < requirement) return false;
-	if(player.defense < requirement) return false;
-	if(player.dexterity < requirement) return false;
-	if(player.agility < requirement) return false;
+	if(player.skills.strength < requirement) return false;
+	if(player.skills.defense < requirement) return false;
+	if(player.skills.dexterity < requirement) return false;
+	if(player.skills.agility < requirement) return false;
 	return true;
 }
 
@@ -21,6 +21,7 @@ function allCombatisAbove(player, requirement){
  * @param {import("NetscriptDefinitions").FactionName} factionName
  */
 async function joinFaction(ns, factionName){
+	// ns.print(`Attempting to join ${factionName}`);
 	await ns.sleep(5000);
 	const invitations = ns.singularity.checkFactionInvitations();
 	if(invitations.includes(factionName)){
