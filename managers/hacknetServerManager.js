@@ -219,7 +219,7 @@ function spendHashes(ns, target, improveStudy = false){
 			ns.hacknet.spendHashes("Improve Studying", target, 1);
 		}
 
-		return `${Color.set("Improve Studying", UPGRADE_COLOR)} - ${Color.set(ns.formatNumber(cost, 0) + " Hash", HASH_COLOR)}`;
+		return `${Color.set("Improve Studying", UPGRADE_COLOR)} - ${Color.set(ns.formatNumber(cost, 3, 1000, true) + " Hash", HASH_COLOR)}`;
 	}
 
 	if(ns.getServerMaxMoney(target) < 10000000000000){ // Should be 10 tril?
@@ -228,7 +228,7 @@ function spendHashes(ns, target, improveStudy = false){
 			ns.hacknet.spendHashes("Increase Maximum Money", target, 1);
 		}
 
-		return `${Color.set("Increase Maximum Money", UPGRADE_COLOR)} - ${Color.set(ns.formatNumber(cost, 0) + " Hash", HASH_COLOR)}`;
+		return `${Color.set("Increase Maximum Money", UPGRADE_COLOR)} - ${Color.set(ns.formatNumber(cost, 3, 1000, true) + " Hash", HASH_COLOR)}`;
 	}
 
 	// We know who we targeting...
@@ -238,7 +238,7 @@ function spendHashes(ns, target, improveStudy = false){
 			ns.hacknet.spendHashes("Reduce Minimum Security", target, 1);
 		}
 
-		return `${Color.set("Reduce Minimum Security", UPGRADE_COLOR)} - ${Color.set(ns.formatNumber(cost, 0) + " Hash", HASH_COLOR)}`;
+		return `${Color.set("Reduce Minimum Security", UPGRADE_COLOR)} - ${Color.set(ns.formatNumber(cost, 3, 1000, true) + " Hash", HASH_COLOR)}`;
 	}
 
 	return Color.set("N/A", UPGRADE_COLOR);
