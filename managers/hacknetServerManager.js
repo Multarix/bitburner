@@ -35,8 +35,8 @@ import { Color } from "helpers/Functions";
 **/
 function serverInfo(ns, nextUpgrade, hashSpending){
 	const MAX_LEVEL = ns.formulas.hacknetServers.constants().MaxLevel;
-	const currentHashes = ns.formatNumber(ns.hacknet.numHashes(), 0);
-	const hashCapacity = ns.formatNumber(ns.hacknet.hashCapacity(), 0);
+	const currentHashes = ns.formatNumber(ns.hacknet.numHashes(), 3, 1000, true);
+	const hashCapacity = ns.formatNumber(ns.hacknet.hashCapacity(), 3, 1000, true);
 
 	const numberNodes = ns.hacknet.numNodes();
 	const maxNodes = ns.hacknet.maxNumNodes();
@@ -137,7 +137,7 @@ function serverInfo(ns, nextUpgrade, hashSpending){
 					const nodeInfo = ns.hacknet.getNodeStats(nextUpgrade.node);
 					const currentCache = ns.formatNumber(nodeInfo.hashCapacity, 0);
 					const nextCache = ns.formatNumber(nodeInfo.hashCapacity * 2, 0);
-					nextUpgradeText = ` ${serverName} - RAM ${Color.set(currentCache, Color.preset.lightPurple)} ➜ ${Color.set(nextCache, Color.preset.orange)} (${cost}) ${isReady}`;
+					nextUpgradeText = ` ${serverName} - Cache ${Color.set(currentCache, Color.preset.lightPurple)} ➜ ${Color.set(nextCache, Color.preset.orange)} (${cost}) ${isReady}`;
 					break;
 				}
 
@@ -214,14 +214,15 @@ const findBest = (obj) => { // Smaller is better
  * @param {string} target
  * @returns {HashSpending}
  **/
-function spendHashes(ns, target, improveStudy = false){
+function spendHashes(ns, target, improveStudy = false, inGang = false){
 	const HASH_COLOR = Color.preset.lightPink;
 	const UPGRADE_COLOR = Color.preset.yellow;
 	const res = { txt: Color.set("N/A", UPGRADE_COLOR), hashCapacity: false };
-
+	const hashCapacity = ns.hacknet.hashCapacity();
+	if(!inGang) return res;
 	if(improveStudy){
 		const cost = ns.hacknet.hashCost("Improve Studying", 1);
-		if(ns.hacknet.hashCapacity() < cost) res.hashCapacity = true;
+		if(hashCapacity <= cost && hashCapacity !== 0) res.hashCapacity = true;
 
 		if(cost < ns.hacknet.numHashes()){
 			ns.hacknet.spendHashes("Improve Studying", target, 1);
@@ -231,11 +232,11 @@ function spendHashes(ns, target, improveStudy = false){
 		return res;
 	}
 
-	if(ns.getServerMaxMoney(target) < 10000000000000){ // Should be 10 tril?
+	if(ns.getServerMaxMoney(target) < 10e13){
 		const cost = ns.hacknet.hashCost("Increase Maximum Money", 1);
-		if(ns.hacknet.hashCapacity() < cost) res.hashCapacity = true;
+		if(hashCapacity < cost && hashCapacity !== 0) res.hashCapacity = true;
 
-		if(cost < ns.hacknet.numHashes()){
+		if(cost <= ns.hacknet.numHashes()){
 			ns.hacknet.spendHashes("Increase Maximum Money", target, 1);
 		}
 
@@ -245,7 +246,7 @@ function spendHashes(ns, target, improveStudy = false){
 
 	if(1 < ns.getServerMinSecurityLevel(target)){
 		const cost = ns.hacknet.hashCost("Reduce Minimum Security", 1);
-		if(ns.hacknet.hashCapacity() < cost) res.hashCapacity = true;
+		if(hashCapacity <= cost && hashCapacity !== 0) res.hashCapacity = true;
 
 		if(cost < ns.hacknet.numHashes()){
 			ns.hacknet.spendHashes("Reduce Minimum Security", target, 1);
@@ -255,6 +256,15 @@ function spendHashes(ns, target, improveStudy = false){
 		return res;
 	}
 
+	// Go back to raising money
+	const cost = ns.hacknet.hashCost("Increase Maximum Money", 1);
+	if(hashCapacity < cost && hashCapacity !== 0) res.hashCapacity = true;
+
+	if(cost <= ns.hacknet.numHashes()){
+		ns.hacknet.spendHashes("Increase Maximum Money", target, 1);
+	}
+
+	res.txt = `${Color.set("Increase Maximum Money", UPGRADE_COLOR)} - ${Color.set(ns.formatNumber(cost, 3, 1000, true) + " Hash", HASH_COLOR)}`;
 	return res;
 }
 
@@ -284,9 +294,12 @@ export async function main(ns){
 	const orderedServers = serversArray.sort((a, b) => b.money - a.money);
 	const bestServer = orderedServers[0].name;
 
+	let catchup = true;
 	let serversMaxed = false;
 	// const announced = false;
 	while(!serversMaxed){
+		const inGang = ns.gang.inGang();
+
 		ns.ui.resizeTail(600, 150);
 		ns.ui.setTailTitle("\u200b Hacknet Manager - Upgrading");
 		serversMaxed = true;
@@ -357,7 +370,7 @@ export async function main(ns){
 		serversMaxed = (toUpgrade.node === -1); // If no upgrades or server can be bought, clearly they're maxed... right? Hopefully?
 		if(serversMaxed) break;
 
-		const hashSpending = spendHashes(ns, "", true);
+		const hashSpending = spendHashes(ns, bestServer, true, inGang);
 		if(hashSpending.hashCapacity){
 			toUpgrade.type = "cache";
 			toUpgrade.cost = Infinity;
@@ -383,36 +396,39 @@ export async function main(ns){
 		ns.ui.resizeTail(680, 20 + (22 * toPrint.length));
 
 		const money = ns.getPlayer().money;
+		let purchased = false;
 		if(toUpgrade.cost < money){
 			switch(toUpgrade.type){
 				case "server": {
-					ns.hacknet.purchaseNode();
+					purchased = ns.hacknet.purchaseNode();
 					break;
 				}
 
 				case "ram": {
-					ns.hacknet.upgradeRam(toUpgrade.node, 1);
+					purchased = ns.hacknet.upgradeRam(toUpgrade.node, 1);
 					break;
 				}
 
 				case "cores": {
-					ns.hacknet.upgradeCore(toUpgrade.node, 1);
+					purchased = ns.hacknet.upgradeCore(toUpgrade.node, 1);
 					break;
 				}
 
 				case "level": {
-					ns.hacknet.upgradeLevel(toUpgrade.node, 10);
+					purchased = ns.hacknet.upgradeLevel(toUpgrade.node, 10);
 					break;
 				}
 
 				case "cache": {
-					ns.hacknet.upgradeCache(toUpgrade.node, 1);
+					purchased = ns.hacknet.upgradeCache(toUpgrade.node, 1);
 					break;
 				}
 			}
 		}
 
-		await ns.sleep(2000);
+		if(!purchased) catchup = false;
+		const sleepTimer = (catchup) ? 100 : 2000;
+		await ns.sleep(sleepTimer);
 	}
 
 	let cachesMaxed = false;
@@ -447,9 +463,12 @@ export async function main(ns){
 		ns.ui.setTailFontSize(14);
 		ns.ui.resizeTail(680, 20 + (22 * toPrint.length));
 
-		if(toUpgrade.cost < ns.getPlayer().money) ns.hacknet.upgradeCache(toUpgrade.node, 1);
+		let purchased = false;
+		if(toUpgrade.cost < ns.getPlayer().money) purchased = ns.hacknet.upgradeCache(toUpgrade.node, 1);
 
-		await ns.sleep(2000);
+		if(!purchased) catchup = false;
+		const sleepTimer = (catchup) ? 100 : 2000;
+		await ns.sleep(sleepTimer);
 	}
 
 	ns.print(Color.set("Hacknet Servers Maxed!", Color.preset.pink));
@@ -467,6 +486,6 @@ export async function main(ns){
 		ns.ui.setTailFontSize(14);
 		ns.ui.resizeTail(680, 20 + (22 * toPrint.length));
 
-		await ns.sleep(2000);
+		await ns.sleep(100);
 	}
 }

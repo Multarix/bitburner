@@ -21,7 +21,7 @@ function allCombatisAbove(player, requirement){
  * @param {import("NetscriptDefinitions").FactionName} factionName
  */
 async function joinFaction(ns, factionName){
-	// ns.print(`Attempting to join ${factionName}`);
+	ns.print(`Attempting to join ${factionName}`);
 	await ns.sleep(5000);
 	const invitations = ns.singularity.checkFactionInvitations();
 	if(invitations.includes(factionName)){
@@ -50,12 +50,12 @@ export async function main(ns){
 
 	const factions = ns.enums.FactionName;
 	const cities = ns.enums.CityName;
-	const acceptedFactions = ns.getPlayer().factions;
 
 	try {
 		const totalAugmentsInstalled = ns.singularity.getOwnedAugmentations(false).length;
 		let allJoined = false;
 		while(!allJoined){
+			const acceptedFactions = ns.getPlayer().factions;
 			// Misc
 			// factionsJoined[factions.Netburners] = acceptedFactions.includes(factions.Netburners);
 			factionsJoined[factions.TianDiHui] = acceptedFactions.includes(factions.TianDiHui);

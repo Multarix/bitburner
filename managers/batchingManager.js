@@ -47,17 +47,7 @@ export async function main(ns){
 		}
 	}
 
-	const actualServer = ns.getServer(target);
-	const mockServer = ns.formulas.mockServer();
-	mockServer.baseDifficulty = actualServer.baseDifficulty;
-	mockServer.moneyMax = actualServer.moneyMax;
-	mockServer.moneyAvailable = actualServer.moneyMax * 0.35;
-	mockServer.minDifficulty = actualServer.minDifficulty;
-	mockServer.hackDifficulty = actualServer.minDifficulty;
-	mockServer.requiredHackingSkill = actualServer.requiredHackingSkill;
-	mockServer.serverGrowth = actualServer.serverGrowth;
-	mockServer.hasAdminRights = true;
-	mockServer.purchasedByPlayer = false;
+
 
 	// Stop the related scripts when the script stops
 	ns.atExit(() => {
@@ -69,6 +59,18 @@ export async function main(ns){
 
 
 	while(true){
+		const actualServer = ns.getServer(target);
+		const mockServer = ns.formulas.mockServer();
+		mockServer.baseDifficulty = actualServer.baseDifficulty;
+		mockServer.moneyMax = actualServer.moneyMax;
+		mockServer.moneyAvailable = actualServer.moneyMax * 0.35;
+		mockServer.minDifficulty = actualServer.minDifficulty;
+		mockServer.hackDifficulty = actualServer.minDifficulty;
+		mockServer.requiredHackingSkill = actualServer.requiredHackingSkill;
+		mockServer.serverGrowth = actualServer.serverGrowth;
+		mockServer.hasAdminRights = true;
+		mockServer.purchasedByPlayer = false;
+
 		// Always aim for 45% of the max money on the server, but if that's more than what's available, only aim for 10% of the available
 		const optimalTake = (actualServer.moneyMax * 0.9 < ns.getServerMoneyAvailable(target)) ? actualServer.moneyMax * 0.45 : 1;
 

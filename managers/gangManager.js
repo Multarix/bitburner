@@ -187,6 +187,7 @@ export async function main(ns){
 	ns.clearLog();
 	ns.ui.openTail();
 	ns.ui.setTailTitle("\u200b Gang Manager");
+	if(ns.gang.getGangInformation().territory === 1) ns.ui.closeTail();
 
 	currentTick = -1;
 
@@ -308,7 +309,7 @@ export async function main(ns){
 
 			const wanted = mem.wantedLevelGain.toFixed(4);
 			const skillLevel = (isHacking) ? ns.formatNumber(mem.hack, 3, 1000, true) : ns.formatNumber(mem.dex, 3, 1000, true);
-			const respect = ns.formatNumber(mem.respectGain, 3, 1000, true);
+			const respect = ns.formatNumber(mem.earnedRespect, 3, 1000, true);
 			const task = mem.task;
 
 			longestName = Math.max(member.length, longestName);
@@ -323,7 +324,7 @@ export async function main(ns){
 			const mem = ns.gang.getMemberInformation(member);
 			const name = Color.set(member.padStart(longestName + 1, " "), Color.preset.lightBlue);
 
-			const hackOrStrength = (isHacking) ? "💻 Hack:" : ": 💪 DEX:";
+			const hackOrStrength = (isHacking) ? "💻 Hack:" : "💪 DEX:";
 			const skillLevel = (isHacking) ? ns.formatNumber(mem.hack, 3, 1000, true) : ns.formatNumber(mem.dex, 3, 1000, true);
 			const skill = Color.set(skillLevel.padStart(longestSkill, " "), Color.preset.lightYellow);
 			const wanted = Color.set(mem.wantedLevelGain.toFixed(4).padStart(longestWanted, " "), Color.preset.lightYellow);

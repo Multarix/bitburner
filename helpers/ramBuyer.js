@@ -5,8 +5,9 @@ export async function main(ns){
 	ns.disableLog("ALL");
 	ns.clearLog();
 
-	const city = ns.args[0];
-	const money = ns.args[1];
+	const player = ns.getPlayer();
+	const city = player.city;
+	const money = player.money;
 
 	const cityNames = ns.enums.CityName;
 	const locationNames = ns.enums.LocationName;
@@ -19,7 +20,6 @@ export async function main(ns){
 	buyLocation[cityNames.Ishima] = locationNames.IshimaOmegaSoftware;
 
 	try {
-		const player = ns.getPlayer();
 		const cost = ns.singularity.getUpgradeHomeRamCost();
 
 		// If we can afford it...
